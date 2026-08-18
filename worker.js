@@ -2,8 +2,6 @@ import { DurableObject } from "cloudflare:workers";
 
 const USERNAME_RE = /^[A-Za-z0-9_]{3,20}$/;
 const CODE_RE = /^[A-Za-z0-9]{4,10}$/;
-const MAX_MESSAGE_LENGTH = 500;
-const MAX_HISTORY = 200;
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -15,29 +13,12 @@ function json(data, status = 200) {
   });
 }
 
-function cleanUsername(value) {
-  return String(value || "").trim();
-}
-
-function cleanCode(value) {
-  return String(value || "").trim();
-}
-
 function userKey(username) {
   return "user:" + username.toLowerCase();
 }
 
 function sessionKey(token) {
   return "session:" + token;
-}
-
-function dmKey(a, b) {
-  const users = [
-    a.toLowerCase(),
-    b.toLowerCase()
-  ].sort();
-
-  return "dm:" + users[0] + ":" + users[1];
 }
 
 async function hashCode(code) {
@@ -54,75 +35,50 @@ async function hashCode(code) {
 }
 
 function createToken() {
-  return (
-    crypto.randomUUID() +
-    "-" +
-    crypto.randomUUID()
-  );
-}
-
-async function getSession(ctx, token) {
-  if (!token) {
-    return null;
-  }
-
-  return await ctx.storage.get(
-    sessionKey(token)
-  );
+  return crypto.randomUUID() + "-" + crypto.randomUUID();
 }
 
 export default {
-
   async fetch(request, env) {
-
     const url = new URL(request.url);
 
-
-    /* =========================
-       REGISTER
-    ========================= */
+    /*
+     * HESAB YARAT
+     */
 
     if (
       url.pathname === "/api/register" &&
       request.method === "POST"
     ) {
-
       try {
-
         const body = await request.json();
 
-        const username =
-          cleanUsername(body.username);
+        const username = String(
+          body.username || ""
+        ).trim();
 
-        const code =
-          cleanCode(body.code);
-
+        const code = String(
+          body.code || ""
+        ).trim();
 
         if (!USERNAME_RE.test(username)) {
-
           return json({
             ok: false,
-            error:
-              "Username 3-20 simvol olmalıdır."
+            error: "Username 3-20 simvol olmalıdır."
           }, 400);
         }
-
 
         if (!CODE_RE.test(code)) {
-
           return json({
             ok: false,
-            error:
-              "Kod 4-10 simvol olmalıdır."
+            error: "Kod 4-10 simvol olmalıdır."
           }, 400);
         }
-
 
         const room =
           env.CHAT_ROOM.getByName("main");
 
-
-        return await room.fetch(
+        return room.fetch(
           new Request(
             new URL(
               "/register",
@@ -130,12 +86,10 @@ export default {
             ),
             {
               method: "POST",
-
               headers: {
                 "Content-Type":
                   "application/json"
               },
-
               body: JSON.stringify({
                 username,
                 code
@@ -145,61 +99,50 @@ export default {
         );
 
       } catch (error) {
-
         return json({
           ok: false,
-          error:
-            "Hesab yaradılarkən server xətası baş verdi."
+          error: "Server xətası."
         }, 500);
       }
     }
 
-
-    /* =========================
-       LOGIN
-    ========================= */
+    /*
+     * HESABA DAXİL OL
+     */
 
     if (
       url.pathname === "/api/login" &&
       request.method === "POST"
     ) {
-
       try {
-
         const body = await request.json();
 
-        const username =
-          cleanUsername(body.username);
+        const username = String(
+          body.username || ""
+        ).trim();
 
-        const code =
-          cleanCode(body.code);
-
+        const code = String(
+          body.code || ""
+        ).trim();
 
         if (!USERNAME_RE.test(username)) {
-
           return json({
             ok: false,
-            error:
-              "Username düzgün deyil."
+            error: "Username düzgün deyil."
           }, 400);
         }
-
 
         if (!CODE_RE.test(code)) {
-
           return json({
             ok: false,
-            error:
-              "Kod 4-10 simvol olmalıdır."
+            error: "Kod 4-10 simvol olmalıdır."
           }, 400);
         }
-
 
         const room =
           env.CHAT_ROOM.getByName("main");
 
-
-        return await room.fetch(
+        return room.fetch(
           new Request(
             new URL(
               "/login",
@@ -207,12 +150,10 @@ export default {
             ),
             {
               method: "POST",
-
               headers: {
                 "Content-Type":
                   "application/json"
               },
-
               body: JSON.stringify({
                 username,
                 code
@@ -222,211 +163,86 @@ export default {
         );
 
       } catch (error) {
-
         return json({
           ok: false,
-          error:
-            "Giriş zamanı server xətası baş verdi."
+          error: "Server xətası."
         }, 500);
       }
     }
 
-
-    /* =========================
-       DM HISTORY
-    ========================= */
-
-    if (
-      url.pathname === "/api/dm" &&
-      request.method === "GET"
-    ) {
-
-      const authorization =
-        request.headers.get(
-          "Authorization"
-        );
-
-
-      if (
-        !authorization ||
-        !authorization.startsWith("Bearer ")
-      ) {
-
-        return json({
-          ok: false,
-          error:
-            "Giriş tələb olunur."
-        }, 401);
-      }
-
-
-      const token =
-        authorization.substring(7);
-
-
-      const other =
-        cleanUsername(
-          url.searchParams.get("with")
-        );
-
-
-      if (!USERNAME_RE.test(other)) {
-
-        return json({
-          ok: false,
-          error:
-            "Username düzgün deyil."
-        }, 400);
-      }
-
-
-      const room =
-        env.CHAT_ROOM.getByName("main");
-
-
-      return await room.fetch(
-        new Request(
-          new URL(
-            "/dm-history",
-            request.url
-          ),
-          {
-            method: "POST",
-
-            headers: {
-              "Content-Type":
-                "application/json"
-            },
-
-            body: JSON.stringify({
-              token,
-              other
-            })
-          }
-        )
-      );
-    }
-
-
-    /* =========================
-       WEBSOCKET
-    ========================= */
+    /*
+     * WEBSOCKET
+     */
 
     if (url.pathname === "/ws") {
-
-      const upgrade =
-        request.headers.get("Upgrade");
-
-
       if (
-        !upgrade ||
-        upgrade.toLowerCase() !== "websocket"
+        request.headers
+          .get("Upgrade")
+          ?.toLowerCase() !== "websocket"
       ) {
-
         return new Response(
           "WebSocket required",
-          {
-            status: 426
-          }
+          { status: 426 }
         );
       }
-
 
       const room =
         env.CHAT_ROOM.getByName("main");
 
-
-      return await room.fetch(request);
+      return room.fetch(request);
     }
 
+    /*
+     * SAYT
+     */
 
-    /* =========================
-       WEBSITE
-    ========================= */
-
-    if (env.ASSETS) {
-      return env.ASSETS.fetch(request);
-    }
-
-
-    return new Response(
-      "SamirChat Worker işləyir.",
-      {
-        status: 200,
-        headers: {
-          "Content-Type":
-            "text/plain; charset=UTF-8"
-        }
-      }
-    );
+    return env.ASSETS.fetch(request);
   }
 };
 
 
-/* =====================================================
-   DURABLE OBJECT
-===================================================== */
-
 export class ChatRoom extends DurableObject {
 
   constructor(ctx, env) {
-
     super(ctx, env);
 
     this.ctx = ctx;
     this.env = env;
   }
 
-
-  /* =========================
-     INTERNAL FETCH
-  ========================= */
-
   async fetch(request) {
 
     const url =
       new URL(request.url);
 
-
-    /* =========================
-       REGISTER
-    ========================= */
+    /*
+     * HESAB YARAT
+     */
 
     if (
       url.pathname === "/register" &&
       request.method === "POST"
     ) {
-
       try {
 
         const body =
           await request.json();
 
-
         const username =
-          cleanUsername(
-            body.username
-          );
-
+          String(body.username || "")
+            .trim();
 
         const code =
-          cleanCode(
-            body.code
-          );
-
+          String(body.code || "")
+            .trim();
 
         const key =
           userKey(username);
 
-
         const existing =
-          await this.ctx.storage.get(
-            key
-          );
-
+          await this.ctx.storage.get(key);
 
         if (existing) {
-
           return json({
             ok: false,
             error:
@@ -434,35 +250,28 @@ export class ChatRoom extends DurableObject {
           }, 409);
         }
 
-
         const codeHash =
           await hashCode(code);
-
 
         await this.ctx.storage.put(
           key,
           {
             username,
             codeHash,
-            createdAt:
-              Date.now()
+            createdAt: Date.now()
           }
         );
 
-
         const token =
           createToken();
-
 
         await this.ctx.storage.put(
           sessionKey(token),
           {
             username,
-            createdAt:
-              Date.now()
+            createdAt: Date.now()
           }
         );
-
 
         return json({
           ok: true,
@@ -470,253 +279,146 @@ export class ChatRoom extends DurableObject {
           token
         });
 
-
       } catch (error) {
 
         return json({
           ok: false,
           error:
-            "Hesab yaratmaq mümkün olmadı."
+            "Hesab yaradılarkən xəta baş verdi."
         }, 500);
+
       }
     }
 
 
-    /* =========================
-       LOGIN
-    ========================= */
+    /*
+     * LOGIN
+     */
 
     if (
       url.pathname === "/login" &&
       request.method === "POST"
     ) {
-
       try {
 
         const body =
           await request.json();
 
-
         const username =
-          cleanUsername(
-            body.username
-          );
-
+          String(body.username || "")
+            .trim();
 
         const code =
-          cleanCode(
-            body.code
-          );
-
+          String(body.code || "")
+            .trim();
 
         const user =
           await this.ctx.storage.get(
             userKey(username)
           );
 
-
         if (!user) {
-
           return json({
             ok: false,
             error:
-              "Bu username ilə hesab tapılmadı."
+              "Belə username ilə hesab tapılmadı."
           }, 404);
         }
 
-
-        const enteredHash =
+        const codeHash =
           await hashCode(code);
 
-
         if (
-          enteredHash !==
-          user.codeHash
+          codeHash !== user.codeHash
         ) {
-
           return json({
             ok: false,
-            error:
-              "Kod səhvdir."
+            error: "Kod səhvdir."
           }, 401);
         }
-
 
         const token =
           createToken();
 
-
         await this.ctx.storage.put(
           sessionKey(token),
           {
-            username:
-              user.username,
-            createdAt:
-              Date.now()
+            username: user.username,
+            createdAt: Date.now()
           }
         );
 
-
         return json({
           ok: true,
-          username:
-            user.username,
+          username: user.username,
           token
         });
 
-
       } catch (error) {
 
         return json({
           ok: false,
           error:
-            "Giriş mümkün olmadı."
+            "Hesaba daxil olarkən xəta baş verdi."
         }, 500);
+
       }
     }
 
 
-    /* =========================
-       DM HISTORY
-    ========================= */
+    /*
+     * WEBSOCKET
+     */
 
     if (
-      url.pathname === "/dm-history" &&
-      request.method === "POST"
+      request.headers
+        .get("Upgrade")
+        ?.toLowerCase() !== "websocket"
     ) {
-
-      try {
-
-        const body =
-          await request.json();
-
-
-        const session =
-          await getSession(
-            this.ctx,
-            body.token
-          );
-
-
-        if (!session) {
-
-          return json({
-            ok: false,
-            error:
-              "Sessiya etibarsızdır."
-          }, 401);
-        }
-
-
-        const other =
-          cleanUsername(
-            body.other
-          );
-
-
-        const key =
-          dmKey(
-            session.username,
-            other
-          );
-
-
-        const history =
-          await this.ctx.storage.get(
-            key
-          );
-
-
-        return json({
-          ok: true,
-
-          messages:
-            Array.isArray(history)
-              ? history
-              : []
-        });
-
-
-      } catch (error) {
-
-        return json({
-          ok: false,
-          error:
-            "Mesajlar yüklənmədi."
-        }, 500);
-      }
-    }
-
-
-    /* =========================
-       WEBSOCKET
-    ========================= */
-
-    const upgrade =
-      request.headers.get("Upgrade");
-
-
-    if (
-      !upgrade ||
-      upgrade.toLowerCase() !== "websocket"
-    ) {
-
       return new Response(
         "SamirChat Worker işləyir."
       );
     }
 
-
     const token =
-      url.searchParams.get(
-        "token"
-      );
+      url.searchParams.get("token");
 
-
-    const session =
-      await getSession(
-        this.ctx,
-        token
-      );
-
-
-    if (!session) {
-
+    if (!token) {
       return new Response(
-        "Invalid session",
-        {
-          status: 401
-        }
+        "Token yoxdur.",
+        { status: 401 }
       );
     }
 
+    const session =
+      await this.ctx.storage.get(
+        sessionKey(token)
+      );
+
+    if (!session) {
+      return new Response(
+        "Sessiya etibarsızdır.",
+        { status: 401 }
+      );
+    }
 
     const username =
       session.username;
 
-
     const pair =
       new WebSocketPair();
-
 
     const client =
       pair[0];
 
-
     const server =
       pair[1];
 
-
-    this.ctx.acceptWebSocket(
-      server
-    );
-
+    this.ctx.acceptWebSocket(server);
 
     server.serializeAttachment({
-      username,
-      token
+      username
     });
-
 
     server.send(
       JSON.stringify({
@@ -727,282 +429,95 @@ export class ChatRoom extends DurableObject {
       })
     );
 
-
     this.broadcastUsers();
 
-
-    return new Response(
-      null,
-      {
-        status: 101,
-        webSocket: client
-      }
-    );
+    return new Response(null, {
+      status: 101,
+      webSocket: client
+    });
   }
 
 
-  /* =========================
-     MESSAGE
-  ========================= */
+  /*
+   * MESAJ
+   */
 
-  async webSocketMessage(
-    ws,
-    message
-  ) {
+  async webSocketMessage(ws, message) {
 
     try {
 
       const data =
         JSON.parse(message);
 
-
       const attachment =
         ws.deserializeAttachment();
 
+      const username =
+        attachment?.username;
 
-      if (!attachment) {
+      if (!username) {
         return;
       }
-
-
-      const from =
-        attachment.username;
-
-
-      /* =========================
-         GENERAL CHAT
-      ========================= */
 
       if (
-        data.type === "message"
+        data.type !== "message"
       ) {
-
-        const text =
-          String(
-            data.text || ""
-          ).trim();
-
-
-        if (
-          !text ||
-          text.length >
-            MAX_MESSAGE_LENGTH
-        ) {
-          return;
-        }
-
-
-        this.broadcast({
-          type: "message",
-          username: from,
-          text,
-          time: Date.now()
-        });
-
-
         return;
       }
 
+      const text =
+        String(data.text || "")
+          .trim();
 
-      /* =========================
-         DM
-      ========================= */
-
-      if (
-        data.type === "dm"
-      ) {
-
-        const to =
-          cleanUsername(
-            data.to
-          );
-
-
-        const text =
-          String(
-            data.text || ""
-          ).trim();
-
-
-        if (
-          !USERNAME_RE.test(to)
-        ) {
-          return;
-        }
-
-
-        if (
-          !text ||
-          text.length >
-            MAX_MESSAGE_LENGTH
-        ) {
-          return;
-        }
-
-
-        const target =
-          await this.ctx.storage.get(
-            userKey(to)
-          );
-
-
-        if (!target) {
-
-          ws.send(
-            JSON.stringify({
-              type: "error",
-              error:
-                "Bu username tapılmadı."
-            })
-          );
-
-          return;
-        }
-
-
-        const messageObject = {
-
-          id:
-            crypto.randomUUID(),
-
-          from,
-
-          to:
-            target.username,
-
-          text,
-
-          time:
-            Date.now()
-        };
-
-
-        /* SAVE DM */
-
-        const key =
-          dmKey(
-            from,
-            target.username
-          );
-
-
-        let history =
-          await this.ctx.storage.get(
-            key
-          );
-
-
-        if (
-          !Array.isArray(history)
-        ) {
-          history = [];
-        }
-
-
-        history.push(
-          messageObject
-        );
-
-
-        if (
-          history.length >
-          MAX_HISTORY
-        ) {
-
-          history =
-            history.slice(
-              -MAX_HISTORY
-            );
-        }
-
-
-        await this.ctx.storage.put(
-          key,
-          history
-        );
-
-
-        /* SEND TO BOTH */
-
-        for (
-          const socket
-          of this.ctx.getWebSockets()
-        ) {
-
-          try {
-
-            const socketData =
-              socket.deserializeAttachment();
-
-
-            const socketUser =
-              socketData?.username;
-
-
-            if (!socketUser) {
-              continue;
-            }
-
-
-            if (
-              socketUser.toLowerCase() ===
-                from.toLowerCase() ||
-
-              socketUser.toLowerCase() ===
-                target.username.toLowerCase()
-            ) {
-
-              socket.send(
-                JSON.stringify({
-                  type: "dm",
-                  ...messageObject
-                })
-              );
-            }
-
-          } catch (error) {
-            // disconnected socket
-          }
-        }
-
-
+      if (!text) {
         return;
       }
+
+      if (text.length > 500) {
+        return;
+      }
+
+      this.broadcast({
+        type: "message",
+        username,
+        text,
+        time: Date.now()
+      });
 
     } catch (error) {
 
       try {
-
         ws.send(
           JSON.stringify({
             type: "error",
             error:
-              "Mesaj göndərmək mümkün olmadı."
+              "Mesaj göndərilmədi."
           })
         );
+      } catch {}
 
-      } catch (e) {}
     }
   }
 
 
-  /* =========================
-     SOCKET CLOSE
-  ========================= */
+  /*
+   * İSTİFADƏÇİ ÇIXDI
+   */
 
-  async webSocketClose(ws) {
+  webSocketClose(ws) {
+
     this.broadcastUsers();
+
   }
 
 
-  /* =========================
-     ONLINE USERS
-  ========================= */
+  /*
+   * AKTİV İSTİFADƏÇİLƏR
+   */
 
   getOnlineUsers() {
 
     const users = [];
-
 
     for (
       const ws
@@ -1011,29 +526,25 @@ export class ChatRoom extends DurableObject {
 
       try {
 
-        const data =
-          ws.deserializeAttachment();
-
-
-        const name =
-          data?.username;
-
+        const username =
+          ws
+            .deserializeAttachment()
+            ?.username;
 
         if (
-          name &&
+          username &&
           !users.some(
             x =>
               x.toLowerCase() ===
-              name.toLowerCase()
+              username.toLowerCase()
           )
         ) {
-
-          users.push(name);
+          users.push(username);
         }
 
-      } catch (error) {}
-    }
+      } catch {}
 
+    }
 
     return users.sort(
       (a, b) =>
@@ -1045,34 +556,5 @@ export class ChatRoom extends DurableObject {
   }
 
 
-  /* =========================
-     BROADCAST
-  ========================= */
-
-  broadcast(data) {
-
-    const message =
-      JSON.stringify(data);
-
-
-    for (
-      const ws
-      of this.ctx.getWebSockets()
-    ) {
-
-      try {
-        ws.send(message);
-      } catch (error) {}
-    }
-  }
-
-
-  broadcastUsers() {
-
-    this.broadcast({
-      type: "users",
-      users:
-        this.getOnlineUsers()
-    });
-  }
-}
+  /*
+   * HAMIS
