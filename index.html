@@ -8,7 +8,7 @@
 <style>
 :root{
   --bg:#f6f4ff;
-  --card:rgba(255,255,255,.82);
+  --card:rgba(255,255,255,.84);
   --text:#25233a;
   --muted:#817e99;
   --primary:#7c6cf2;
@@ -19,9 +19,7 @@
   --shadow:0 18px 55px rgba(76,62,145,.13);
 }
 
-*{
-  box-sizing:border-box;
-}
+*{box-sizing:border-box}
 
 body{
   margin:0;
@@ -34,10 +32,7 @@ body{
   min-height:100vh;
 }
 
-button,
-input{
-  font-family:inherit;
-}
+button,input{font-family:inherit}
 
 /* LOGIN */
 
@@ -104,21 +99,9 @@ input{
   cursor:pointer;
 }
 
-.primaryButton:hover{
-  filter:brightness(.97);
-}
-
-.secondaryButton{
-  width:100%;
-  border:0;
-  padding:14px;
-  border-radius:16px;
-  background:#eeeaf9;
-  color:var(--text);
-  font-size:15px;
-  font-weight:700;
-  cursor:pointer;
-  margin-top:10px;
+.primaryButton:disabled{
+  opacity:.6;
+  cursor:not-allowed;
 }
 
 .error{
@@ -213,8 +196,7 @@ header{
   gap:20px;
 }
 
-.panel,
-.chat{
+.panel,.chat{
   background:var(--card);
   backdrop-filter:blur(18px);
   border:1px solid rgba(255,255,255,.8);
@@ -271,13 +253,8 @@ header{
   background:linear-gradient(135deg,#8b7cf6,#c59cff);
 }
 
-.user b{
-  display:block;
-}
-
-.user small{
-  color:var(--muted);
-}
+.user b{display:block}
+.user small{color:var(--muted)}
 
 .onlineDot{
   width:9px;
@@ -418,11 +395,6 @@ header{
   margin-bottom:10px;
 }
 
-.status{
-  font-size:13px;
-  color:var(--muted);
-}
-
 .connectionDot{
   width:9px;
   height:9px;
@@ -522,10 +494,7 @@ header{
 
     <div id="loginError" class="error"></div>
 
-    <button
-      id="loginButton"
-      class="primaryButton"
-    >
+    <button id="loginButton" class="primaryButton">
       Hesab yarat
     </button>
 
@@ -534,10 +503,7 @@ header{
         Artıq hesabın var?
       </span>
 
-      <button
-        id="modeButton"
-        class="modeButton"
-      >
+      <button id="modeButton" class="modeButton">
         Hesaba daxil ol
       </button>
     </div>
@@ -547,13 +513,9 @@ header{
 </section>
 
 
-<!-- CHAT APP -->
+<!-- CHAT -->
 
-<div
-  class="app"
-  id="chatApp"
-  style="display:none"
->
+<div class="app" id="chatApp" style="display:none">
 
 <header>
 
@@ -573,10 +535,7 @@ header{
       TikTok · @ssamirreds
     </a>
 
-    <button
-      class="logout"
-      id="logoutButton"
-    >
+    <button class="logout" id="logoutButton">
       Çıxış
     </button>
 
@@ -587,113 +546,95 @@ header{
 
 <div class="layout">
 
-<!-- USERS -->
+  <!-- USERS -->
 
-<aside class="panel">
-
-  <input
-    id="searchInput"
-    class="search"
-    placeholder="🔎 Username axtar..."
-    autocomplete="off"
-  >
-
-  <div class="title">
-    Online istifadəçilər
-  </div>
-
-  <div id="usersList"></div>
-
-</aside>
-
-
-<!-- CHAT -->
-
-<main class="chat">
-
-  <div class="chatHead">
-
-    <div
-      class="avatar"
-      id="chatAvatar"
-    >
-      S
-    </div>
-
-    <div class="chatHeadInfo">
-
-      <div
-        class="chatHeadTitle"
-        id="chatTitle"
-      >
-        Ümumi söhbət
-      </div>
-
-      <div
-        class="chatHeadSub"
-        id="chatSubtitle"
-      >
-        SamirChat
-        <span
-          id="connectionDot"
-          class="connectionDot"
-        ></span>
-      </div>
-
-    </div>
-
-  </div>
-
-
-  <div
-    class="messages"
-    id="messages"
-  >
-
-    <div class="notice">
-      💜 Söhbətdə bir-birinizə qarşı olan hörməti pozmayın.
-      Zəhmət olmasa nalayiq sözlərdən istifadə etməyin.
-    </div>
-
-    <div
-      class="empty"
-      id="emptyMessage"
-    >
-
-      <div class="emptyIcon">
-        💬
-      </div>
-
-      <h2>SamirChat-a xoş gəlmisən</h2>
-
-      <p>
-        Online istifadəçi seçərək şəxsi mesajlaşmaya başlaya bilərsən.
-      </p>
-
-    </div>
-
-  </div>
-
-
-  <div class="composer">
+  <aside class="panel">
 
     <input
-      id="messageInput"
-      maxlength="500"
+      id="searchInput"
+      class="search"
+      placeholder="🔎 Username axtar..."
       autocomplete="off"
-      placeholder="Mesaj yaz..."
     >
 
-    <button
-      class="send"
-      id="sendButton"
-    >
-      Göndər
-    </button>
+    <div class="title">
+      Online istifadəçilər
+    </div>
 
-  </div>
+    <div id="usersList"></div>
 
-</main>
+  </aside>
+
+
+  <!-- CHAT -->
+
+  <main class="chat">
+
+    <div class="chatHead">
+
+      <div class="avatar" id="chatAvatar">
+        S
+      </div>
+
+      <div class="chatHeadInfo">
+
+        <div class="chatHeadTitle" id="chatTitle">
+          Ümumi söhbət
+        </div>
+
+        <div class="chatHeadSub" id="chatSubtitle">
+          SamirChat
+          <span
+            id="connectionDot"
+            class="connectionDot"
+          ></span>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="messages" id="messages">
+
+      <div class="notice">
+        💜 Söhbətdə bir-birinizə qarşı olan hörməti pozmayın.
+        Zəhmət olmasa nalayiq sözlərdən istifadə etməyin.
+      </div>
+
+      <div class="empty" id="emptyMessage">
+
+        <div class="emptyIcon">
+          💬
+        </div>
+
+        <h2>SamirChat-a xoş gəlmisən</h2>
+
+        <p>
+          Online istifadəçi seçərək şəxsi mesajlaşmaya başlaya bilərsən.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div class="composer">
+
+      <input
+        id="messageInput"
+        maxlength="500"
+        autocomplete="off"
+        placeholder="Mesaj yaz..."
+      >
+
+      <button class="send" id="sendButton">
+        Göndər
+      </button>
+
+    </div>
+
+  </main>
 
 </div>
 
@@ -701,6 +642,10 @@ header{
 
 
 <script>
+
+/* =========================
+   ELEMENTS
+========================= */
 
 const loginScreen =
   document.getElementById("loginScreen");
@@ -760,6 +705,10 @@ const connectionDot =
   document.getElementById("connectionDot");
 
 
+/* =========================
+   VARIABLES
+========================= */
+
 let isLoginMode = false;
 let username = "";
 let token = "";
@@ -768,69 +717,64 @@ let selectedUser = null;
 
 
 /* =========================
-   LOGIN MODE
+   LOGIN / REGISTER MODE
 ========================= */
 
-modeButton.addEventListener(
-  "click",
-  function(){
+modeButton.addEventListener("click", function(){
 
-    isLoginMode =
-      !isLoginMode;
+  isLoginMode = !isLoginMode;
 
-    loginError.textContent = "";
+  loginError.textContent = "";
 
-    usernameInput.value = "";
-    codeInput.value = "";
+  usernameInput.value = "";
+  codeInput.value = "";
 
-    if(isLoginMode){
+  if(isLoginMode){
 
-      loginDescription.textContent =
-        "Username və kodunla hesabına daxil ol.";
+    loginDescription.textContent =
+      "Username və kodunla hesabına daxil ol.";
 
-      loginButton.textContent =
-        "Hesaba daxil ol";
+    loginButton.textContent =
+      "Hesaba daxil ol";
 
-      modeQuestion.textContent =
-        "Hesabın yoxdur?";
+    modeQuestion.textContent =
+      "Hesabın yoxdur?";
 
-      modeButton.textContent =
-        "Hesab yarat";
+    modeButton.textContent =
+      "Hesab yarat";
 
-      codeInput.autocomplete =
-        "current-password";
+    codeInput.autocomplete =
+      "current-password";
 
-    }else{
+  }else{
 
-      loginDescription.textContent =
-        "Hesabını yarat və dostlarınla söhbət et.";
+    loginDescription.textContent =
+      "Hesabını yarat və dostlarınla söhbət et.";
 
-      loginButton.textContent =
-        "Hesab yarat";
+    loginButton.textContent =
+      "Hesab yarat";
 
-      modeQuestion.textContent =
-        "Artıq hesabın var?";
+    modeQuestion.textContent =
+      "Artıq hesabın var?";
 
-      modeButton.textContent =
-        "Hesaba daxil ol";
+    modeButton.textContent =
+      "Hesaba daxil ol";
 
-      codeInput.autocomplete =
-        "new-password";
-    }
-
+    codeInput.autocomplete =
+      "new-password";
   }
-);
+
+});
 
 
 /* =========================
-   LOGIN BUTTON
+   AUTH
 ========================= */
 
 loginButton.addEventListener(
   "click",
   handleAuth
 );
-
 
 usernameInput.addEventListener(
   "keydown",
@@ -842,7 +786,6 @@ usernameInput.addEventListener(
 
   }
 );
-
 
 codeInput.addEventListener(
   "keydown",
@@ -864,13 +807,9 @@ async function handleAuth(){
   const code =
     codeInput.value.trim();
 
-
   loginError.textContent = "";
 
-
-  if(
-    !/^[A-Za-z0-9_]{3,20}$/.test(value)
-  ){
+  if(!/^[A-Za-z0-9_]{3,20}$/.test(value)){
 
     loginError.textContent =
       "Username 3-20 simvol olmalıdır. Yalnız hərf, rəqəm və _ istifadə et.";
@@ -878,10 +817,7 @@ async function handleAuth(){
     return;
   }
 
-
-  if(
-    !/^[A-Za-z0-9]{4,10}$/.test(code)
-  ){
+  if(!/^[A-Za-z0-9]{4,10}$/.test(code)){
 
     loginError.textContent =
       "Kod 4-10 simvol olmalıdır. Hərf və rəqəm istifadə edə bilərsən.";
@@ -889,12 +825,9 @@ async function handleAuth(){
     return;
   }
 
-
   loginButton.disabled = true;
 
-  loginButton.textContent =
-    "Gözlə...";
-
+  loginButton.textContent = "Gözlə...";
 
   try{
 
@@ -903,18 +836,14 @@ async function handleAuth(){
         ? "/api/login"
         : "/api/register";
 
-
     const response =
       await fetch(
         endpoint,
         {
           method:"POST",
-
           headers:{
-            "Content-Type":
-              "application/json"
+            "Content-Type":"application/json"
           },
-
           body:JSON.stringify({
             username:value,
             code:code
@@ -922,10 +851,8 @@ async function handleAuth(){
         }
       );
 
-
     const data =
       await response.json();
-
 
     if(!response.ok || !data.ok){
 
@@ -936,17 +863,11 @@ async function handleAuth(){
       return;
     }
 
-
     username =
       data.username;
 
     token =
       data.token;
-
-
-    /*
-     * GİRİŞİ YADDA SAXLA
-     */
 
     localStorage.setItem(
       "samirchat_username",
@@ -957,7 +878,6 @@ async function handleAuth(){
       "samirchat_token",
       token
     );
-
 
     openChat();
 
@@ -970,8 +890,7 @@ async function handleAuth(){
 
   }finally{
 
-    loginButton.disabled =
-      false;
+    loginButton.disabled = false;
 
     loginButton.textContent =
       isLoginMode
@@ -999,11 +918,7 @@ function checkSavedLogin(){
       "samirchat_token"
     );
 
-
-  if(
-    savedUsername &&
-    savedToken
-  ){
+  if(savedUsername && savedToken){
 
     username =
       savedUsername;
@@ -1031,10 +946,7 @@ function openChat(){
     "block";
 
   chatAvatar.textContent =
-    username
-      .charAt(0)
-      .toUpperCase();
-
+    username.charAt(0).toUpperCase();
 
   connect();
 
@@ -1077,7 +989,6 @@ logoutButton.addEventListener(
 
     usernameInput.value = "";
     codeInput.value = "";
-
     loginError.textContent = "";
 
   }
@@ -1094,7 +1005,6 @@ function connect(){
     return;
   }
 
-
   if(socket){
 
     try{
@@ -1103,12 +1013,10 @@ function connect(){
 
   }
 
-
   const protocol =
     location.protocol === "https:"
       ? "wss:"
       : "ws:";
-
 
   socket =
     new WebSocket(
@@ -1129,11 +1037,11 @@ function connect(){
       );
 
       chatSubtitle.textContent =
-        "online";
+        selectedUser
+          ? "Şəxsi mesaj"
+          : "SamirChat";
 
-      if(!selectedUser){
-        showGeneralChat();
-      }
+      updateConnection();
 
     }
   );
@@ -1141,7 +1049,7 @@ function connect(){
 
   socket.addEventListener(
     "message",
-    async function(event){
+    function(event){
 
       try{
 
@@ -1188,16 +1096,14 @@ function connect(){
             selectedUser &&
             (
               data.from.toLowerCase() ===
-                selectedUser.toLowerCase()
+              selectedUser.toLowerCase()
               ||
               data.to.toLowerCase() ===
-                selectedUser.toLowerCase()
+              selectedUser.toLowerCase()
             )
           ){
 
-            addDMMessage(
-              data
-            );
+            addDMMessage(data);
 
           }
 
@@ -1228,7 +1134,7 @@ function connect(){
       }catch(error){
 
         console.error(
-          "WebSocket message error:",
+          "WebSocket error:",
           error
         );
 
@@ -1252,6 +1158,48 @@ function connect(){
     }
   );
 
+
+  socket.addEventListener(
+    "error",
+    function(){
+
+      connectionDot.classList.remove(
+        "online"
+      );
+
+    }
+  );
+
+}
+
+
+/* =========================
+   CONNECTION
+========================= */
+
+function updateConnection(){
+
+  if(!socket){
+    return;
+  }
+
+  if(
+    socket.readyState ===
+    WebSocket.OPEN
+  ){
+
+    connectionDot.classList.add(
+      "online"
+    );
+
+  }else{
+
+    connectionDot.classList.remove(
+      "online"
+    );
+
+  }
+
 }
 
 
@@ -1264,16 +1212,13 @@ function sendGeneralMessage(){
   const text =
     messageInput.value.trim();
 
-
   if(!text){
     return;
   }
 
-
   if(
     !socket ||
-    socket.readyState !==
-      WebSocket.OPEN
+    socket.readyState !== WebSocket.OPEN
   ){
 
     addSystem(
@@ -1283,14 +1228,12 @@ function sendGeneralMessage(){
     return;
   }
 
-
   socket.send(
     JSON.stringify({
       type:"message",
       text:text
     })
   );
-
 
   messageInput.value = "";
 
@@ -1306,11 +1249,9 @@ function sendDM(){
   const text =
     messageInput.value.trim();
 
-
   if(!text){
     return;
   }
-
 
   if(!selectedUser){
 
@@ -1319,11 +1260,9 @@ function sendDM(){
     return;
   }
 
-
   if(
     !socket ||
-    socket.readyState !==
-      WebSocket.OPEN
+    socket.readyState !== WebSocket.OPEN
   ){
 
     addSystem(
@@ -1333,7 +1272,6 @@ function sendDM(){
     return;
   }
 
-
   socket.send(
     JSON.stringify({
       type:"dm",
@@ -1342,14 +1280,13 @@ function sendDM(){
     })
   );
 
-
   messageInput.value = "";
 
 }
 
 
 /* =========================
-   SEND BUTTON
+   SEND
 ========================= */
 
 sendButton.addEventListener(
@@ -1385,7 +1322,7 @@ messageInput.addEventListener(
 
 
 /* =========================
-   SHOW GENERAL
+   GENERAL CHAT
 ========================= */
 
 function showGeneralChat(){
@@ -1408,11 +1345,19 @@ function showGeneralChat(){
     </div>
 
     <div class="empty" id="emptyMessage">
+
       <div class="emptyIcon">💬</div>
+
       <h2>Ümumi söhbət</h2>
-      <p>Hamı ilə burada söhbət edə bilərsən.</p>
+
+      <p>
+        Hamı ilə burada söhbət edə bilərsən.
+      </p>
+
     </div>
   `;
+
+  updateUsersFromDOM();
 
 }
 
@@ -1430,15 +1375,7 @@ async function openDM(user){
     return;
   }
 
-
   selectedUser =
     user;
 
-
-  chatTitle.textContent =
-    "@" + user;
-
-  chatSubtitle.textContent =
-    "Şəxsi mesaj";
-
- 
+  chatTitle.textC
