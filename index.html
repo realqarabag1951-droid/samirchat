@@ -1,997 +1,1506 @@
-import { DurableObject } from "cloudflare:workers";
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-const USERNAME_RE = /^[A-Za-z0-9_]{3,20}$/;
-const CODE_RE = /^[A-Za-z0-9]{4,10}$/;
-const MAX_MESSAGE_LENGTH = 500;
-const MAX_HISTORY = 200;
+<title>SamirChat</title>
 
-const BAD_WORDS = [
-  "sik",
-  "sikiş",
-  "sikim",
-  "sikdir",
-  "amcik",
-  "amcıq",
-  "qəhbə",
-  "qehbe",
-  "orospu",
-  "puta",
-  "fuck",
-  "shit"
-];
-
-function json(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: {
-      "Content-Type": "application/json; charset=UTF-8",
-      "Cache-Control": "no-store"
-    }
-  });
+<style>
+*{
+  box-sizing:border-box;
 }
 
-function cleanUsername(value) {
-  return String(value || "").trim();
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:#f5f3ff;
+  color:#25233a;
 }
 
-function cleanCode(value) {
-  return String(value || "").trim();
+button,
+input{
+  font-family:inherit;
 }
 
-function userKey(username) {
-  return `user:${username.toLowerCase()}`;
+/* LOGIN */
+
+.login{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
 }
 
-function sessionKey(token) {
-  return `session:${token}`;
+.login-card{
+  width:100%;
+  max-width:420px;
+  background:white;
+  padding:35px;
+  border-radius:25px;
+  box-shadow:0 15px 50px rgba(70,50,150,.15);
+  text-align:center;
 }
 
-function dmKey(a, b) {
-  const users = [
-    a.toLowerCase(),
-    b.toLowerCase()
-  ].sort();
-
-  return `dm:${users[0]}:${users[1]}`;
+.logo{
+  width:65px;
+  height:65px;
+  margin:auto;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:20px;
+  background:#7c6cf2;
+  color:white;
+  font-size:30px;
+  font-weight:bold;
 }
 
-function containsBadWord(text) {
-  const value = String(text).toLowerCase();
-
-  return BAD_WORDS.some(word =>
-    value.includes(word)
-  );
+.login-card h1{
+  margin:18px 0 8px;
 }
 
-async function hashCode(code) {
-  const bytes =
-    new TextEncoder().encode(code);
-
-  const hash =
-    await crypto.subtle.digest(
-      "SHA-256",
-      bytes
-    );
-
-  return Array.from(
-    new Uint8Array(hash)
-  )
-    .map(x =>
-      x.toString(16).padStart(2, "0")
-    )
-    .join("");
+.login-card p{
+  color:#777;
 }
 
-function createToken() {
-  return (
-    crypto.randomUUID() +
-    "-" +
-    crypto.randomUUID()
-  );
+.input{
+  width:100%;
+  border:0;
+  outline:none;
+  background:#f0eef8;
+  padding:15px;
+  border-radius:14px;
+  margin-top:10px;
+  font-size:16px;
 }
 
-async function getSession(ctx, token) {
-  if (!token) {
-    return null;
+.main-button{
+  width:100%;
+  border:0;
+  background:#7c6cf2;
+  color:white;
+  padding:15px;
+  border-radius:14px;
+  margin-top:14px;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.main-button:disabled{
+  opacity:.6;
+}
+
+.switch{
+  margin-top:18px;
+  color:#777;
+  font-size:14px;
+}
+
+.switch button{
+  border:0;
+  background:none;
+  color:#6d5ce7;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.error{
+  color:#df4c69;
+  min-height:20px;
+  margin-top:10px;
+  font-size:14px;
+}
+
+/* APP */
+
+.app{
+  display:none;
+  max-width:1200px;
+  margin:auto;
+  padding:20px;
+}
+
+.header{
+  background:white;
+  border-radius:20px;
+  padding:15px 20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:20px;
+  box-shadow:0 10px 35px rgba(70,50,150,.1);
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:21px;
+  font-weight:bold;
+}
+
+.brand-logo{
+  width:42px;
+  height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#7c6cf2;
+  color:white;
+  border-radius:13px;
+}
+
+.header-right{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+
+.tiktok{
+  text-decoration:none;
+  color:white;
+  background:#171625;
+  padding:10px 14px;
+  border-radius:12px;
+  font-size:14px;
+  font-weight:bold;
+}
+
+.logout{
+  border:0;
+  background:#eeeaf8;
+  padding:10px 13px;
+  border-radius:12px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+.layout{
+  display:grid;
+  grid-template-columns:300px 1fr;
+  gap:20px;
+}
+
+.sidebar,
+.chat{
+  background:white;
+  border-radius:23px;
+  box-shadow:0 10px 35px rgba(70,50,150,.1);
+}
+
+.sidebar{
+  padding:18px;
+}
+
+.search{
+  width:100%;
+  border:0;
+  outline:none;
+  background:#f0eef8;
+  padding:13px;
+  border-radius:13px;
+}
+
+.sidebar-title{
+  font-weight:bold;
+  margin:20px 0 10px;
+}
+
+.user{
+  padding:12px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  border-radius:14px;
+  cursor:pointer;
+}
+
+.user:hover{
+  background:#f0edff;
+}
+
+.avatar{
+  width:43px;
+  height:43px;
+  min-width:43px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#8b7cf6;
+  color:white;
+  border-radius:13px;
+  font-weight:bold;
+}
+
+.user-name{
+  font-weight:bold;
+}
+
+.user-status{
+  color:#777;
+  font-size:12px;
+  margin-top:3px;
+}
+
+.chat{
+  min-height:650px;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+.chat-header{
+  padding:18px 20px;
+  border-bottom:1px solid #eee;
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.chat-info{
+  flex:1;
+}
+
+.chat-title{
+  font-weight:bold;
+}
+
+.chat-subtitle{
+  color:#777;
+  font-size:12px;
+  margin-top:3px;
+}
+
+.dot{
+  display:inline-block;
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:#aaa;
+  margin-left:5px;
+}
+
+.dot.online{
+  background:#43d17a;
+}
+
+.messages{
+  flex:1;
+  padding:20px;
+  overflow-y:auto;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.notice{
+  align-self:center;
+  background:#fff6d8;
+  color:#75601c;
+  padding:9px 13px;
+  border-radius:12px;
+  font-size:12px;
+  text-align:center;
+  margin-bottom:5px;
+}
+
+.message{
+  max-width:75%;
+  padding:11px 14px;
+  border-radius:17px;
+  word-break:break-word;
+}
+
+.message.me{
+  align-self:flex-end;
+  background:#7c6cf2;
+  color:white;
+  border-bottom-right-radius:5px;
+}
+
+.message.other{
+  align-self:flex-start;
+  background:#eeeaf8;
+  border-bottom-left-radius:5px;
+}
+
+.message-name{
+  font-size:11px;
+  font-weight:bold;
+  opacity:.7;
+  margin-bottom:4px;
+}
+
+.message-time{
+  font-size:10px;
+  opacity:.6;
+  margin-top:4px;
+}
+
+.system{
+  text-align:center;
+  color:#888;
+  font-size:12px;
+  margin:5px;
+}
+
+.empty{
+  margin:auto;
+  text-align:center;
+  color:#777;
+}
+
+.empty-icon{
+  font-size:50px;
+}
+
+.composer{
+  border-top:1px solid #eee;
+  padding:15px;
+  display:flex;
+  gap:8px;
+}
+
+.message-input{
+  flex:1;
+  border:0;
+  outline:none;
+  background:#f0eef8;
+  padding:14px;
+  border-radius:14px;
+  font-size:15px;
+}
+
+.send{
+  border:0;
+  background:#7c6cf2;
+  color:white;
+  padding:0 20px;
+  border-radius:14px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+@media(max-width:800px){
+
+  .app{
+    padding:10px;
   }
 
-  return await ctx.storage.get(
-    sessionKey(token)
-  );
-}
-
-export default {
-  async fetch(request, env) {
-    const url = new URL(request.url);
-
-    /*
-     * REGISTER
-     */
-
-    if (
-      url.pathname === "/api/register" &&
-      request.method === "POST"
-    ) {
-      try {
-        const body =
-          await request.json();
-
-        const username =
-          cleanUsername(body.username);
-
-        const code =
-          cleanCode(body.code);
-
-        if (
-          !USERNAME_RE.test(username)
-        ) {
-          return json(
-            {
-              ok: false,
-              error:
-                "Username 3-20 simvol olmalıdır."
-            },
-            400
-          );
-        }
-
-        if (
-          !CODE_RE.test(code)
-        ) {
-          return json(
-            {
-              ok: false,
-              error:
-                "Kod 4-10 simvol olmalıdır. Hərf və rəqəm istifadə edə bilərsən."
-            },
-            400
-          );
-        }
-
-        const room =
-          env.CHAT_ROOM.getByName("main");
-
-        return room.fetch(
-          new Request(
-            new URL(
-              "/register",
-              request.url
-            ),
-            {
-              method: "POST",
-              headers: {
-                "Content-Type":
-                  "application/json"
-              },
-              body: JSON.stringify({
-                username,
-                code
-              })
-            }
-          )
-        );
-      } catch {
-        return json(
-          {
-            ok: false,
-            error:
-              "Qeydiyyat zamanı xəta baş verdi."
-          },
-          400
-        );
-      }
-    }
-
-    /*
-     * LOGIN
-     */
-
-    if (
-      url.pathname === "/api/login" &&
-      request.method === "POST"
-    ) {
-      try {
-        const body =
-          await request.json();
-
-        const username =
-          cleanUsername(body.username);
-
-        const code =
-          cleanCode(body.code);
-
-        if (
-          !USERNAME_RE.test(username)
-        ) {
-          return json(
-            {
-              ok: false,
-              error:
-                "Username düzgün deyil."
-            },
-            400
-          );
-        }
-
-        if (
-          !CODE_RE.test(code)
-        ) {
-          return json(
-            {
-              ok: false,
-              error:
-                "Kod 4-10 simvol olmalıdır."
-            },
-            400
-          );
-        }
-
-        const room =
-          env.CHAT_ROOM.getByName("main");
-
-        return room.fetch(
-          new Request(
-            new URL(
-              "/login",
-              request.url
-            ),
-            {
-              method: "POST",
-              headers: {
-                "Content-Type":
-                  "application/json"
-              },
-              body: JSON.stringify({
-                username,
-                code
-              })
-            }
-          )
-        );
-      } catch {
-        return json(
-          {
-            ok: false,
-            error:
-              "Giriş zamanı xəta baş verdi."
-          },
-          400
-        );
-      }
-    }
-
-    /*
-     * DM HISTORY
-     */
-
-    if (
-      url.pathname === "/api/dm" &&
-      request.method === "GET"
-    ) {
-      const authorization =
-        request.headers.get(
-          "Authorization"
-        );
-
-      if (
-        !authorization ||
-        !authorization.startsWith(
-          "Bearer "
-        )
-      ) {
-        return json(
-          {
-            ok: false,
-            error:
-              "Giriş tələb olunur."
-          },
-          401
-        );
-      }
-
-      const token =
-        authorization.slice(7);
-
-      const other =
-        cleanUsername(
-          url.searchParams.get("with")
-        );
-
-      if (
-        !USERNAME_RE.test(other)
-      ) {
-        return json(
-          {
-            ok: false,
-            error:
-              "Username düzgün deyil."
-          },
-          400
-        );
-      }
-
-      const room =
-        env.CHAT_ROOM.getByName("main");
-
-      return room.fetch(
-        new Request(
-          new URL(
-            "/dm-history",
-            request.url
-          ),
-          {
-            method: "POST",
-            headers: {
-              "Content-Type":
-                "application/json"
-            },
-            body: JSON.stringify({
-              token,
-              other
-            })
-          }
-        )
-      );
-    }
-
-    /*
-     * WEBSOCKET
-     */
-
-    if (
-      url.pathname === "/ws"
-    ) {
-      if (
-        request.headers
-          .get("Upgrade")
-          ?.toLowerCase() !==
-        "websocket"
-      ) {
-        return new Response(
-          "WebSocket required",
-          { status: 426 }
-        );
-      }
-
-      const room =
-        env.CHAT_ROOM.getByName("main");
-
-      return room.fetch(request);
-    }
-
-    /*
-     * WEBSITE
-     */
-
-    return env.ASSETS.fetch(request);
+  .layout{
+    grid-template-columns:1fr;
   }
+
+  .sidebar{
+    display:none;
+  }
+
+  .chat{
+    min-height:80vh;
+  }
+
+  .header{
+    padding:12px;
+  }
+
+  .brand{
+    font-size:17px;
+  }
+
+  .tiktok{
+    font-size:12px;
+    padding:9px;
+  }
+
+  .logout{
+    padding:9px;
+  }
+
+  .message{
+    max-width:85%;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+
+<div class="login" id="loginScreen">
+
+  <div class="login-card">
+
+    <div class="logo">S</div>
+
+    <h1>SamirChat</h1>
+
+    <p id="loginText">
+      Hesabını yarat və söhbətə başla.
+    </p>
+
+    <input
+      id="username"
+      class="input"
+      maxlength="20"
+      placeholder="Username"
+      autocomplete="username"
+    >
+
+    <input
+      id="code"
+      class="input"
+      maxlength="10"
+      placeholder="4-10 simvolluq kod"
+      autocomplete="current-password"
+    >
+
+    <div
+      id="error"
+      class="error"
+    ></div>
+
+    <button
+      id="authButton"
+      class="main-button"
+    >
+      Hesab yarat
+    </button>
+
+    <div class="switch">
+
+      <span id="switchText">
+        Artıq hesabın var?
+      </span>
+
+      <button id="switchButton">
+        Hesaba daxil ol
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- APP -->
+
+<div
+  class="app"
+  id="app"
+>
+
+  <div class="header">
+
+    <div class="brand">
+
+      <div class="brand-logo">
+        S
+      </div>
+
+      SamirChat
+
+    </div>
+
+    <div class="header-right">
+
+      <a
+        class="tiktok"
+        href="https://www.tiktok.com/@ssamirreds"
+        target="_blank"
+      >
+        TikTok
+      </a>
+
+      <button
+        class="logout"
+        id="logout"
+      >
+        Çıxış
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <div class="layout">
+
+    <!-- USERS -->
+
+    <aside class="sidebar">
+
+      <input
+        id="search"
+        class="search"
+        placeholder="🔎 Username axtar..."
+      >
+
+      <div class="sidebar-title">
+        Online istifadəçilər
+      </div>
+
+      <div id="users"></div>
+
+    </aside>
+
+
+    <!-- CHAT -->
+
+    <main class="chat">
+
+      <div class="chat-header">
+
+        <div
+          class="avatar"
+          id="chatAvatar"
+        >
+          S
+        </div>
+
+        <div class="chat-info">
+
+          <div
+            class="chat-title"
+            id="chatTitle"
+          >
+            Ümumi söhbət
+          </div>
+
+          <div
+            class="chat-subtitle"
+            id="chatSubtitle"
+          >
+            SamirChat
+            <span
+              id="dot"
+              class="dot"
+            ></span>
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div
+        class="messages"
+        id="messages"
+      >
+
+        <div class="notice">
+          💜 Söhbətdə bir-birinizə qarşı hörməti qoruyun.
+        </div>
+
+        <div class="empty">
+
+          <div class="empty-icon">
+            💬
+          </div>
+
+          <h2>
+            SamirChat-a xoş gəlmisən
+          </h2>
+
+          <p>
+            Online istifadəçi seçərək DM başlada bilərsən.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="composer">
+
+        <input
+          id="message"
+          class="message-input"
+          maxlength="500"
+          placeholder="Mesaj yaz..."
+          autocomplete="off"
+        >
+
+        <button
+          id="send"
+          class="send"
+        >
+          Göndər
+        </button>
+
+      </div>
+
+    </main>
+
+  </div>
+
+</div>
+
+
+<script>
+
+let registerMode = true;
+
+let currentUsername = "";
+let currentToken = "";
+
+let socket = null;
+
+let selectedUser = null;
+
+
+/* ELEMENTS */
+
+const loginScreen =
+  document.getElementById("loginScreen");
+
+const app =
+  document.getElementById("app");
+
+const usernameInput =
+  document.getElementById("username");
+
+const codeInput =
+  document.getElementById("code");
+
+const errorBox =
+  document.getElementById("error");
+
+const authButton =
+  document.getElementById("authButton");
+
+const switchButton =
+  document.getElementById("switchButton");
+
+const switchText =
+  document.getElementById("switchText");
+
+const loginText =
+  document.getElementById("loginText");
+
+const logoutButton =
+  document.getElementById("logout");
+
+const usersBox =
+  document.getElementById("users");
+
+const searchInput =
+  document.getElementById("search");
+
+const messages =
+  document.getElementById("messages");
+
+const messageInput =
+  document.getElementById("message");
+
+const sendButton =
+  document.getElementById("send");
+
+const chatTitle =
+  document.getElementById("chatTitle");
+
+const chatSubtitle =
+  document.getElementById("chatSubtitle");
+
+const chatAvatar =
+  document.getElementById("chatAvatar");
+
+const dot =
+  document.getElementById("dot");
+
+
+/* =========================
+   REGISTER / LOGIN SWITCH
+========================= */
+
+switchButton.onclick = () => {
+
+  registerMode =
+    !registerMode;
+
+  errorBox.textContent = "";
+
+  usernameInput.value = "";
+  codeInput.value = "";
+
+  if(registerMode){
+
+    loginText.textContent =
+      "Hesabını yarat və söhbətə başla.";
+
+    authButton.textContent =
+      "Hesab yarat";
+
+    switchText.textContent =
+      "Artıq hesabın var?";
+
+    switchButton.textContent =
+      "Hesaba daxil ol";
+
+  }else{
+
+    loginText.textContent =
+      "Username və kodunla hesabına daxil ol.";
+
+    authButton.textContent =
+      "Hesaba daxil ol";
+
+    switchText.textContent =
+      "Hesabın yoxdur?";
+
+    switchButton.textContent =
+      "Hesab yarat";
+
+  }
+
 };
 
 
-export class ChatRoom extends DurableObject {
+/* =========================
+   AUTH
+========================= */
 
-  constructor(ctx, env) {
-    super(ctx, env);
+authButton.onclick =
+  authenticate;
 
-    this.ctx = ctx;
-    this.env = env;
+
+codeInput.addEventListener(
+  "keydown",
+  e => {
+
+    if(e.key === "Enter"){
+      authenticate();
+    }
+
+  }
+);
+
+
+usernameInput.addEventListener(
+  "keydown",
+  e => {
+
+    if(e.key === "Enter"){
+      codeInput.focus();
+    }
+
+  }
+);
+
+
+async function authenticate(){
+
+  const name =
+    usernameInput.value.trim();
+
+  const code =
+    codeInput.value.trim();
+
+
+  errorBox.textContent = "";
+
+
+  if(
+    !/^[A-Za-z0-9_]{3,20}$/.test(name)
+  ){
+
+    errorBox.textContent =
+      "Username 3-20 simvol olmalıdır.";
+
+    return;
   }
 
-  async fetch(request) {
-    const url =
-      new URL(request.url);
 
-    /*
-     * REGISTER
-     */
+  if(
+    !/^[A-Za-z0-9]{4,10}$/.test(code)
+  ){
 
-    if (
-      url.pathname === "/register" &&
-      request.method === "POST"
-    ) {
-      try {
-        const body =
-          await request.json();
+    errorBox.textContent =
+      "Kod 4-10 simvol olmalıdır.";
 
-        const username =
-          cleanUsername(
-            body.username
-          );
-
-        const code =
-          cleanCode(body.code);
-
-        const key =
-          userKey(username);
-
-        const existing =
-          await this.ctx.storage.get(
-            key
-          );
-
-        if (existing) {
-          return json(
-            {
-              ok: false,
-              error:
-                "Bu username artıq istifadə olunur."
-            },
-            409
-          );
-        }
-
-        const codeHash =
-          await hashCode(code);
-
-        await this.ctx.storage.put(
-          key,
-          {
-            username,
-            codeHash,
-            createdAt: Date.now()
-          }
-        );
-
-        const token =
-          createToken();
-
-        await this.ctx.storage.put(
-          sessionKey(token),
-          {
-            username,
-            createdAt: Date.now()
-          }
-        );
-
-        return json({
-          ok: true,
-          username,
-          token
-        });
-
-      } catch {
-        return json(
-          {
-            ok: false,
-            error:
-              "Hesab yaradılmadı."
-          },
-          500
-        );
-      }
-    }
-
-    /*
-     * LOGIN
-     */
-
-    if (
-      url.pathname === "/login" &&
-      request.method === "POST"
-    ) {
-      try {
-        const body =
-          await request.json();
-
-        const username =
-          cleanUsername(
-            body.username
-          );
-
-        const code =
-          cleanCode(body.code);
-
-        const user =
-          await this.ctx.storage.get(
-            userKey(username)
-          );
-
-        if (!user) {
-          return json(
-            {
-              ok: false,
-              error:
-                "Bu username ilə hesab tapılmadı."
-            },
-            404
-          );
-        }
-
-        const codeHash =
-          await hashCode(code);
-
-        if (
-          codeHash !== user.codeHash
-        ) {
-          return json(
-            {
-              ok: false,
-              error:
-                "Kod səhvdir."
-            },
-            401
-          );
-        }
-
-        const token =
-          createToken();
-
-        await this.ctx.storage.put(
-          sessionKey(token),
-          {
-            username: user.username,
-            createdAt: Date.now()
-          }
-        );
-
-        return json({
-          ok: true,
-          username: user.username,
-          token
-        });
-
-      } catch {
-        return json(
-          {
-            ok: false,
-            error:
-              "Giriş zamanı xəta baş verdi."
-          },
-          500
-        );
-      }
-    }
-
-    /*
-     * DM HISTORY
-     */
-
-    if (
-      url.pathname === "/dm-history" &&
-      request.method === "POST"
-    ) {
-      try {
-        const body =
-          await request.json();
-
-        const session =
-          await getSession(
-            this.ctx,
-            body.token
-          );
-
-        if (!session) {
-          return json(
-            {
-              ok: false,
-              error:
-                "Sessiya etibarlı deyil."
-            },
-            401
-          );
-        }
-
-        const other =
-          cleanUsername(body.other);
-
-        const history =
-          await this.ctx.storage.get(
-            dmKey(
-              session.username,
-              other
-            )
-          ) || [];
-
-        return json({
-          ok: true,
-          messages:
-            Array.isArray(history)
-              ? history
-              : []
-        });
-
-      } catch {
-        return json(
-          {
-            ok: false,
-            error:
-              "Mesajlar yüklənmədi."
-          },
-          500
-        );
-      }
-    }
-
-    /*
-     * WEBSOCKET
-     */
-
-    if (
-      request.headers
-        .get("Upgrade")
-        ?.toLowerCase() !==
-      "websocket"
-    ) {
-      return new Response(
-        "SamirChat Worker işləyir.",
-        { status: 200 }
-      );
-    }
-
-    const token =
-      url.searchParams.get(
-        "token"
-      );
-
-    const session =
-      await getSession(
-        this.ctx,
-        token
-      );
-
-    if (!session) {
-      return new Response(
-        "Invalid session",
-        { status: 401 }
-      );
-    }
-
-    const username =
-      session.username;
-
-    const pair =
-      new WebSocketPair();
-
-    const client =
-      pair[0];
-
-    const server =
-      pair[1];
-
-    this.ctx.acceptWebSocket(
-      server,
-      [username]
-    );
-
-    server.serializeAttachment({
-      username,
-      token
-    });
-
-    server.send(
-      JSON.stringify({
-        type: "welcome",
-        username,
-        users:
-          this.getOnlineUsers()
-      })
-    );
-
-    this.broadcast(
-      {
-        type: "system",
-        text:
-          `@${username} çata qoşuldu.`
-      },
-      server
-    );
-
-    this.broadcastUsers();
-
-    return new Response(null, {
-      status: 101,
-      webSocket: client
-    });
+    return;
   }
 
-  async webSocketMessage(
-    ws,
-    message
-  ) {
-    try {
-      const data =
-        JSON.parse(message);
 
-      const attachment =
-        ws.deserializeAttachment();
+  authButton.disabled = true;
 
-      const username =
-        attachment?.username;
+  authButton.textContent =
+    "Gözlə...";
 
-      if (!username) {
-        return;
-      }
 
-      /*
-       * GENERAL CHAT
-       */
+  try{
 
-      if (
-        data.type === "message"
-      ) {
-        const text =
-          String(data.text || "")
-            .trim();
+    const endpoint =
+      registerMode
+        ? "/api/register"
+        : "/api/login";
 
-        if (
-          !text ||
-          text.length >
-            MAX_MESSAGE_LENGTH
-        ) {
-          return;
-        }
 
-        if (
-          containsBadWord(text)
-        ) {
-          ws.send(
-            JSON.stringify({
-              type: "error",
-              error:
-                "Zəhmət olmasa nalayiq sözlərdən istifadə etmə."
-            })
-          );
+    const response =
+      await fetch(
+        endpoint,
+        {
+          method:"POST",
 
-          return;
-        }
+          headers:{
+            "Content-Type":
+              "application/json"
+          },
 
-        this.broadcast({
-          type: "message",
-          username,
-          text,
-          time: Date.now()
-        });
-
-        return;
-      }
-
-      /*
-       * DIRECT MESSAGE
-       */
-
-      if (
-        data.type === "dm"
-      ) {
-        const to =
-          cleanUsername(data.to);
-
-        const text =
-          String(data.text || "")
-            .trim();
-
-        if (
-          !USERNAME_RE.test(to)
-        ) {
-          return;
-        }
-
-        if (
-          !text ||
-          text.length >
-            MAX_MESSAGE_LENGTH
-        ) {
-          return;
-        }
-
-        if (
-          containsBadWord(text)
-        ) {
-          ws.send(
-            JSON.stringify({
-              type: "error",
-              error:
-                "Zəhmət olmasa nalayiq sözlərdən istifadə etmə."
-            })
-          );
-
-          return;
-        }
-
-        const target =
-          await this.ctx.storage.get(
-            userKey(to)
-          );
-
-        if (!target) {
-          ws.send(
-            JSON.stringify({
-              type: "error",
-              error:
-                "Belə username tapılmadı."
-            })
-          );
-
-          return;
-        }
-
-        const dm = {
-          id:
-            crypto.randomUUID(),
-
-          from:
-            username,
-
-          to:
-            target.username,
-
-          text,
-
-          time:
-            Date.now()
-        };
-
-        const key =
-          dmKey(
-            username,
-            target.username
-          );
-
-        let history =
-          await this.ctx.storage.get(
-            key
-          );
-
-        if (
-          !Array.isArray(history)
-        ) {
-          history = [];
-        }
-
-        history.push(dm);
-
-        if (
-          history.length >
-          MAX_HISTORY
-        ) {
-          history =
-            history.slice(
-              -MAX_HISTORY
-            );
-        }
-
-        await this.ctx.storage.put(
-          key,
-          history
-        );
-
-        /*
-         * SEND TO BOTH SIDES
-         */
-
-        for (
-          const socket
-          of this.ctx.getWebSockets()
-        ) {
-          try {
-            const socketUser =
-              socket
-                .deserializeAttachment()
-                ?.username;
-
-            if (!socketUser) {
-              continue;
-            }
-
-            if (
-              socketUser.toLowerCase() ===
-              target.username.toLowerCase()
-              ||
-              socketUser.toLowerCase() ===
-              username.toLowerCase()
-            ) {
-              socket.send(
-                JSON.stringify({
-                  type: "dm",
-                  ...dm
-                })
-              );
-            }
-
-          } catch {
-            // disconnected
-          }
-        }
-
-        return;
-      }
-
-    } catch {
-      try {
-        ws.send(
-          JSON.stringify({
-            type: "error",
-            error:
-              "Mesaj göndərilərkən xəta baş verdi."
+          body:JSON.stringify({
+            username:name,
+            code:code
           })
-        );
-      } catch {}
-    }
-  }
+        }
+      );
 
-  webSocketClose(ws) {
-    const attachment =
-      ws.deserializeAttachment();
 
-    const username =
-      attachment?.username;
+    const data =
+      await response.json();
 
-    if (!username) {
+
+    if(!response.ok || !data.ok){
+
+      errorBox.textContent =
+        data.error ||
+        "Xəta baş verdi.";
+
       return;
     }
 
-    this.broadcast({
-      type: "system",
-      text:
-        `@${username} çatdan ayrıldı.`
-    });
 
-    this.broadcastUsers();
-  }
+    currentUsername =
+      data.username;
 
-  getOnlineUsers() {
-    const users = [];
+    currentToken =
+      data.token;
 
-    for (
-      const ws
-      of this.ctx.getWebSockets()
-    ) {
-      try {
-        const username =
-          ws
-            .deserializeAttachment()
-            ?.username;
 
-        if (
-          username &&
-          !users.some(
-            x =>
-              x.toLowerCase() ===
-              username.toLowerCase()
-          )
-        ) {
-          users.push(username);
-        }
-
-      } catch {}
-    }
-
-    return users.sort(
-      (a, b) =>
-        a.toLowerCase()
-          .localeCompare(
-            b.toLowerCase()
-          )
+    localStorage.setItem(
+      "samirchat_username",
+      currentUsername
     );
+
+    localStorage.setItem(
+      "samirchat_token",
+      currentToken
+    );
+
+
+    openApp();
+
+  }catch(error){
+
+    console.error(error);
+
+    errorBox.textContent =
+      "Serverə qoşulmaq mümkün olmadı.";
+
+  }finally{
+
+    authButton.disabled = false;
+
+    authButton.textContent =
+      registerMode
+        ? "Hesab yarat"
+        : "Hesaba daxil ol";
+
   }
 
-  broadcast(
-    data,
-    except = null
-  ) {
-    const message =
-      JSON.stringify(data);
+}
 
-    for (
-      const ws
-      of this.ctx.getWebSockets()
-    ) {
-      if (
-        ws === except
-      ) {
-        continue;
+
+/* =========================
+   SAVED LOGIN
+========================= */
+
+function checkLogin(){
+
+  const savedName =
+    localStorage.getItem(
+      "samirchat_username"
+    );
+
+  const savedToken =
+    localStorage.getItem(
+      "samirchat_token"
+    );
+
+
+  if(savedName && savedToken){
+
+    currentUsername =
+      savedName;
+
+    currentToken =
+      savedToken;
+
+    openApp();
+
+  }
+
+}
+
+
+/* =========================
+   OPEN APP
+========================= */
+
+function openApp(){
+
+  loginScreen.style.display =
+    "none";
+
+  app.style.display =
+    "block";
+
+  chatAvatar.textContent =
+    currentUsername
+      .charAt(0)
+      .toUpperCase();
+
+  connect();
+
+}
+
+
+/* =========================
+   WEBSOCKET
+========================= */
+
+function connect(){
+
+  if(!currentToken){
+    return;
+  }
+
+
+  const protocol =
+    location.protocol === "https:"
+      ? "wss:"
+      : "ws:";
+
+
+  socket =
+    new WebSocket(
+      protocol +
+      "//" +
+      location.host +
+      "/ws?token=" +
+      encodeURIComponent(
+        currentToken
+      )
+    );
+
+
+  socket.onopen = () => {
+
+    dot.classList.add("online");
+
+    chatSubtitle.textContent =
+      "Online";
+
+  };
+
+
+  socket.onmessage = event => {
+
+    try{
+
+      const data =
+        JSON.parse(event.data);
+
+
+      if(data.type === "welcome"){
+
+        updateUsers(
+          data.users || []
+        );
+
       }
 
-      try {
-        ws.send(message);
-      } catch {}
+
+      if(data.type === "users"){
+
+        updateUsers(
+          data.users || []
+        );
+
+      }
+
+
+      if(data.type === "message"){
+
+        if(!selectedUser){
+
+          addMessage(
+            data.username,
+            data.text,
+            data.time
+          );
+
+        }
+
+      }
+
+
+      if(data.type === "dm"){
+
+        if(!selectedUser){
+          return;
+        }
+
+
+        const belongs =
+          (
+            data.from.toLowerCase() ===
+              selectedUser.toLowerCase()
+          &&
+            data.to.toLowerCase() ===
+              currentUsername.toLowerCase()
+          )
+          ||
+          (
+            data.to.toLowerCase() ===
+              selectedUser.toLowerCase()
+          &&
+            data.from.toLowerCase() ===
+              currentUsername.toLowerCase()
+          );
+
+
+        if(belongs){
+
+          addMessage(
+            data.from,
+            data.text,
+            data.time
+          );
+
+        }
+
+      }
+
+
+      if(data.type === "system"){
+
+        if(!selectedUser){
+
+          addSystem(
+            data.text
+          );
+
+        }
+
+      }
+
+
+      if(data.type === "error"){
+
+        addSystem(
+          data.error
+        );
+
+      }
+
+    }catch(error){
+
+      console.error(error);
+
     }
+
+  };
+
+
+  socket.onclose = () => {
+
+    dot.classList.remove(
+      "online"
+    );
+
+    chatSubtitle.textContent =
+      "Offline";
+
+  };
+
+}
+
+
+/* =========================
+   USERS
+========================= */
+
+let allUsers = [];
+
+
+function updateUsers(list){
+
+  allUsers =
+    list.filter(
+      name =>
+        name.toLowerCase() !==
+        currentUsername.toLowerCase()
+    );
+
+  renderUsers();
+
+}
+
+
+function renderUsers(){
+
+  const search =
+    searchInput.value
+      .trim()
+      .toLowerCase();
+
+
+  usersBox.innerHTML = "";
+
+
+  const filtered =
+    allUsers.filter(
+      name =>
+        name.toLowerCase()
+          .includes(search)
+    );
+
+
+  if(filtered.length === 0){
+
+    usersBox.innerHTML =
+      "<div style='color:#888;font-size:13px;padding:10px'>Online istifadəçi yoxdur.</div>";
+
+    return;
   }
 
-  broadcastUsers() {
-    this.broadcast({
-      type: "users",
-      users:
-        this.getOnlineUsers()
-    });
-  }
+
+  filtered.forEach(name => {
+
+    const user =
+      document.createElement("div");
+
+    user.className =
+      "user";
+
+
+    const avatar =
+      document.createElement("div");
+
+    avatar.className =
+      "avatar";
+
+    avatar.textContent =
+      name.charAt(0).toUpperCase();
+
+
+    const info =
+      document.createElement("div");
+
+
+    const title =
+      document.createElement("div");
+
+    title.className =
+      "user-name";
+
+    title.textContent =
+      "@" + name;
+
+
+    const status =
+      document.createElement("div");
+
+    status.className =
+      "user-status";
+
+    status.textContent =
+      "Online";
+
+
+    info.appendChild(title);
+    info.appendChild(status);
+
+    user.appendChild(avatar);
+    user.appendChild(info);
+
+
+    user.onclick = () => {
+
+      openDM(name);
+
+    };
+
+
+    usersBox.appendChild(user);
+
+  });
+
 }
+
+
+searchInput.addEventListener(
+  "input",
+  renderUsers
+);
+
+
+/* =========================
+   GENERAL CHAT
+========================= */
+
+function showGeneral(){
+
+  selectedUser = null;
+
+  chatTitle.textContent =
+    "Ümumi söhbət";
+
+  chatSubtitle.textContent =
+    "SamirChat";
+
+  chatAvatar.textContent =
+    "S";
+
+
+  messages.innerHTML = `
+
+    <div class="notice">
+      💜 Söhbətdə bir-birinizə qarşı hörməti qoruyun.
+    </div>
+
+    <div class="empty">
+
+      <div class="empty-icon">
+        💬
+      </div>
+
+      <h2>
+        Ümumi söhbət
+      </h2>
+
+      <p>
+        Hamı ilə burada söhbət edə bilərsən.
+      </p>
+
+    </div>
+
+  `;
+
+}
+
+
+/* =========================
+   DM
+========================= */
+
+function openDM(name){
+
+  selectedUser =
+    name;
+
+
+  chatTitle.textContent =
+    "@" + name;
+
+  chatSubtitle.textContent =
+    "Şəxsi mesaj";
+
+  chatAvatar.textContent =
+    name.charAt(0).toUpperCase();
+
+
+  /*
+  DM TARİXÇƏSİ QƏSDƏN
+  SERVERDƏN YÜKLƏNMİR.
+  */
+
+  messages.innerHTML = `
+
+    <div class="notice">
+      💬 Bu şəxsi söhbətdir.
+    </div>
+
+    <div class="empty">
+
+      <div class="empty-icon">
+        👋
+      </div>
+
+      <h2>
+        @${escapeHtml(name)}
+      </h2>
+
+      <p>
+        Mesajını yaz və göndər.
+      </p>
+
+    </div>
+
+  `;
+
+}
+
+
+/* =========================
+   SEND
+========================= */
+
+sendButton.onclick =
+  sendMessage;
+
+
+messageInput.addEventListener(
+  "keydown",
+  e => {
+
+    if(e.key === "Enter"){
+
+      sendMessage();
+
+    }
+
+  }
+);
+
+
+function sendMessage(){
+
+  const text =
+    messageInput.value.trim();
+
+
+  if(!text){
+    return;
+  }
+
+
+  if(
+    !socket ||
+    socket.readyState !==
+      WebSocket.OPEN
+  ){
+
+    addSystem(
+      "Serverə qoşulu deyilsən."
+    );
+
+    return;
+  }
+
+
+  if(selectedUser){
+
+    socket.send(
+      JSON.stringify({
+        type:"dm",
+        to:selectedUser,
+        text:text
+      })
+    );
+
+  }else{
+
+    socket.send(
+      JSON.stringify({
+        type:"message",
+        text:text
+      })
+    );
+
+  }
+
+
+  messageInput.value = "";
+
+}
+
+
+/* =========================
+   ADD MESSAGE
+========================= */
+
+function addMessage(
+  name,
+  text,
+  time
+){
+
+  const empty =
+    messages.querySelector(".empty");
+
+  if(empty){
+    empty.remove();
+  }
+
+
+  const box =
+    document.createElement("div");
+
+
+  box.className =
+    "message " +
+    (
+      name.toLowerCase() ===
+      currentUsername.toLowerCase()
+        ? "me"
+        : "other"
+    );
+
+
+  const sender =
+    document.createElement("div");
+
+  sender.className =
+    "message-name";
+
+  sender.textContent =
+    "@" + name;
+
+
+  const content =
+    document.createElement("div");
+
+  content.textContent =
+    text;
+
+
+  const clock =
+    document.createElement("div");
+
+  clock.className =
+    "message-time";
+
+  clock.textContent =
+    new Date(time || Date.now())
+      .toLocaleTimeString(
+        "az-AZ",
+        {
+          hour:"2-digit",
+          minute:"2-digit"
+        }
+      );
+
+
+  box.appendChild(sender);
+  box.appendChild(content);
+  box.appendChild(clock);
+
+
+  messages.appendChild(box);
+
+  messages.scrollTop =
+    messages.scrollHeight;
+
+}
+
+
+/* =========================
+   SYSTEM
+========================= */
+
+fun
