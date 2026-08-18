@@ -2,6 +2,7 @@ import { DurableObject } from "cloudflare:workers";
 
 const USERNAME_RE = /^[A-Za-z0-9_]{3,20}$/;
 const CODE_RE = /^[A-Za-z0-9]{4,10}$/;
+
 const MAX_MESSAGE_LENGTH = 500;
 const MAX_HISTORY = 200;
 
@@ -10,7 +11,6 @@ const BAD_WORDS = [
   "sikiş",
   "sikim",
   "sikdir",
-  "sikdirin",
   "amcik",
   "amcıq",
   "qəhbə",
@@ -38,6 +38,10 @@ function userKey(username) {
   return `user:${username.toLowerCase()}`;
 }
 
+function sessionKey(token) {
+  return `session:${token}`;
+}
+
 function dmKey(a, b) {
   const users = [
     a.toLowerCase(),
@@ -50,9 +54,7 @@ function dmKey(a, b) {
 function containsBadWord(text) {
   const lower = String(text).toLowerCase();
 
-  return BAD_WORDS.some(word => {
-    return lower.includes(word);
-  });
+  return BAD_WORDS.some(word => lower.includes(word));
 }
 
 async function hashCode(code) {
@@ -64,12 +66,18 @@ async function hashCode(code) {
   );
 
   return Array.from(new Uint8Array(hash))
-    .map(byte => byte.toString(16).padStart(2, "0"))
+    .map(byte =>
+      byte.toString(16).padStart(2, "0")
+    )
     .join("");
 }
 
 function createToken() {
-  return crypto.randomUUID() + "-" + crypto.randomUUID();
+  return (
+    crypto.randomUUID() +
+    "-" +
+    crypto.randomUUID()
+  );
 }
 
 export default {
@@ -77,7 +85,9 @@ export default {
     const url = new URL(request.url);
 
     /*
+     * =========================
      * REGISTER
+     * =========================
      */
 
     if (
@@ -109,7 +119,7 @@ export default {
             {
               ok: false,
               error:
-                "Kod 4-10 simvol olmalıdır və hərf/rəqəm istifadə edə bilərsən."
+                "Kod 4-10 simvol olmalıdır və yalnız hərf və rəqəm istifadə edilə bilər."
             },
             400
           );
@@ -120,7 +130,10 @@ export default {
 
         return room.fetch(
           new Request(
-            new URL("/internal/register", request.url),
+            new URL(
+              "/internal/register",
+              request.url
+            ),
             {
               method: "POST",
               headers: {
@@ -134,6 +147,7 @@ export default {
             }
           )
         );
+
       } catch {
         return json(
           {
@@ -146,7 +160,9 @@ export default {
     }
 
     /*
+     * =========================
      * LOGIN
+     * =========================
      */
 
     if (
@@ -166,7 +182,8 @@ export default {
           return json(
             {
               ok: false,
-              error: "Username düzgün deyil."
+              error:
+                "Username düzgün deyil."
             },
             400
           );
@@ -176,7 +193,8 @@ export default {
           return json(
             {
               ok: false,
-              error: "Kod 4-10 simvol olmalıdır."
+              error:
+                "Kod 4-10 simvol olmalıdır."
             },
             400
           );
@@ -187,7 +205,10 @@ export default {
 
         return room.fetch(
           new Request(
-            new URL("/internal/login", request.url),
+            new URL(
+              "/internal/login",
+              request.url
+            ),
             {
               method: "POST",
               headers: {
@@ -201,11 +222,13 @@ export default {
             }
           )
         );
+
       } catch {
         return json(
           {
             ok: false,
-            error: "Yanlış sorğu."
+            error:
+              "Giriş zamanı xəta baş verdi."
           },
           400
         );
@@ -213,7 +236,9 @@ export default {
     }
 
     /*
+     * =========================
      * DM HISTORY
+     * =========================
      */
 
     if (
@@ -221,13 +246,19 @@ export default {
       request.method === "GET"
     ) {
       const auth =
-        request.headers.get("Authorization");
+        request.headers.get(
+          "Authorization"
+        );
 
-      if (!auth || !auth.startsWith("Bearer ")) {
+      if (
+        !auth ||
+        !auth.startsWith("Bearer ")
+      ) {
         return json(
           {
             ok: false,
-            error: "Giriş tələb olunur."
+            error:
+              "Giriş tələb olunur."
           },
           401
         );
@@ -245,7 +276,8 @@ export default {
         return json(
           {
             ok: false,
-            error: "İstifadəçi göstərilməyib."
+            error:
+              "İstifadəçi göstərilməyib."
           },
           400
         );
@@ -256,7 +288,10 @@ export default {
 
       return room.fetch(
         new Request(
-          new URL("/internal/dm-history", request.url),
+          new URL(
+            "/internal/dm-history",
+            request.url
+          ),
           {
             method: "POST",
             headers: {
@@ -273,13 +308,17 @@ export default {
     }
 
     /*
+     * =========================
      * WEBSOCKET
+     * =========================
      */
 
     if (url.pathname === "/ws") {
       if (
-        request.headers.get("Upgrade")
-          ?.toLowerCase() !== "websocket"
+        request.headers
+          .get("Upgrade")
+          ?.toLowerCase() !==
+        "websocket"
       ) {
         return new Response(
           "WebSocket required",
@@ -294,7 +333,9 @@ export default {
     }
 
     /*
-     * FRONTEND
+     * =========================
+     * WEBSITE
+     * =========================
      */
 
     return env.ASSETS.fetch(request);
@@ -302,7 +343,14 @@ export default {
 };
 
 
+/*
+ * ==========================================
+ * CHAT ROOM
+ * ==========================================
+ */
+
 export class ChatRoom extends DurableObject {
+
   constructor(ctx, env) {
     super(ctx, env);
 
@@ -310,15 +358,13 @@ export class ChatRoom extends DurableObject {
     this.env = env;
   }
 
-  /*
-   * INTERNAL API + WEBSOCKET
-   */
-
   async fetch(request) {
     const url = new URL(request.url);
 
     /*
+     * =========================
      * REGISTER
+     * =========================
      */
 
     if (
@@ -326,10 +372,13 @@ export class ChatRoom extends DurableObject {
       request.method === "POST"
     ) {
       try {
-        const body = await request.json();
+        const body =
+          await request.json();
 
         const username =
-          normalizeUsername(body.username);
+          normalizeUsername(
+            body.username
+          );
 
         const code =
           String(body.code || "").trim();
@@ -338,7 +387,9 @@ export class ChatRoom extends DurableObject {
           userKey(username);
 
         const existing =
-          await this.ctx.storage.get(key);
+          await this.ctx.storage.get(
+            key
+          );
 
         if (existing) {
           return json(
@@ -367,7 +418,7 @@ export class ChatRoom extends DurableObject {
           createToken();
 
         await this.ctx.storage.put(
-          `session:${token}`,
+          sessionKey(token),
           {
             username,
             createdAt: Date.now()
@@ -379,11 +430,13 @@ export class ChatRoom extends DurableObject {
           username,
           token
         });
+
       } catch {
         return json(
           {
             ok: false,
-            error: "Qeydiyyat zamanı xəta baş verdi."
+            error:
+              "Qeydiyyat zamanı xəta baş verdi."
           },
           500
         );
@@ -391,7 +444,9 @@ export class ChatRoom extends DurableObject {
     }
 
     /*
+     * =========================
      * LOGIN
+     * =========================
      */
 
     if (
@@ -399,10 +454,13 @@ export class ChatRoom extends DurableObject {
       request.method === "POST"
     ) {
       try {
-        const body = await request.json();
+        const body =
+          await request.json();
 
         const username =
-          normalizeUsername(body.username);
+          normalizeUsername(
+            body.username
+          );
 
         const code =
           String(body.code || "").trim();
@@ -426,11 +484,14 @@ export class ChatRoom extends DurableObject {
         const codeHash =
           await hashCode(code);
 
-        if (codeHash !== user.codeHash) {
+        if (
+          codeHash !== user.codeHash
+        ) {
           return json(
             {
               ok: false,
-              error: "Kod səhvdir."
+              error:
+                "Kod səhvdir."
             },
             401
           );
@@ -440,7 +501,7 @@ export class ChatRoom extends DurableObject {
           createToken();
 
         await this.ctx.storage.put(
-          `session:${token}`,
+          sessionKey(token),
           {
             username: user.username,
             createdAt: Date.now()
@@ -452,11 +513,13 @@ export class ChatRoom extends DurableObject {
           username: user.username,
           token
         });
+
       } catch {
         return json(
           {
             ok: false,
-            error: "Giriş zamanı xəta baş verdi."
+            error:
+              "Giriş zamanı xəta baş verdi."
           },
           500
         );
@@ -464,7 +527,9 @@ export class ChatRoom extends DurableObject {
     }
 
     /*
+     * =========================
      * DM HISTORY
+     * =========================
      */
 
     if (
@@ -477,23 +542,26 @@ export class ChatRoom extends DurableObject {
 
         const session =
           await this.ctx.storage.get(
-            `session:${body.token}`
+            sessionKey(body.token)
           );
 
         if (!session) {
           return json(
             {
               ok: false,
-              error: "Sessiya etibarlı deyil."
+              error:
+                "Sessiya etibarlı deyil."
             },
             401
           );
         }
 
         const other =
-          normalizeUsername(body.other);
+          normalizeUsername(
+            body.other
+          );
 
-        const messages =
+        const history =
           await this.ctx.storage.get(
             dmKey(
               session.username,
@@ -503,8 +571,9 @@ export class ChatRoom extends DurableObject {
 
         return json({
           ok: true,
-          messages
+          messages: history
         });
+
       } catch {
         return json(
           {
@@ -518,12 +587,16 @@ export class ChatRoom extends DurableObject {
     }
 
     /*
+     * =========================
      * WEBSOCKET
+     * =========================
      */
 
     if (
-      request.headers.get("Upgrade")
-        ?.toLowerCase() !== "websocket"
+      request.headers
+        .get("Upgrade")
+        ?.toLowerCase() !==
+      "websocket"
     ) {
       return new Response(
         "SamirChat Worker işləyir.",
@@ -532,7 +605,9 @@ export class ChatRoom extends DurableObject {
     }
 
     const token =
-      url.searchParams.get("token");
+      url.searchParams.get(
+        "token"
+      );
 
     if (!token) {
       return new Response(
@@ -543,7 +618,7 @@ export class ChatRoom extends DurableObject {
 
     const session =
       await this.ctx.storage.get(
-        `session:${token}`
+        sessionKey(token)
       );
 
     if (!session) {
@@ -579,7 +654,8 @@ export class ChatRoom extends DurableObject {
       JSON.stringify({
         type: "welcome",
         username,
-        users: this.getOnlineUsers()
+        users:
+          this.getOnlineUsers()
       })
     );
 
@@ -594,17 +670,25 @@ export class ChatRoom extends DurableObject {
 
     this.broadcastUsers();
 
-    return new Response(null, {
-      status: 101,
-      webSocket: client
-    });
+    return new Response(
+      null,
+      {
+        status: 101,
+        webSocket: client
+      }
+    );
   }
 
   /*
+   * =========================
    * MESSAGE
+   * =========================
    */
 
-  async webSocketMessage(ws, message) {
+  async webSocketMessage(
+    ws,
+    message
+  ) {
     try {
       const data =
         JSON.parse(message);
@@ -623,19 +707,24 @@ export class ChatRoom extends DurableObject {
        * GENERAL CHAT
        */
 
-      if (data.type === "message") {
+      if (
+        data.type === "message"
+      ) {
         const text =
           String(data.text || "")
             .trim();
 
         if (
           !text ||
-          text.length > MAX_MESSAGE_LENGTH
+          text.length >
+            MAX_MESSAGE_LENGTH
         ) {
           return;
         }
 
-        if (containsBadWord(text)) {
+        if (
+          containsBadWord(text)
+        ) {
           ws.send(
             JSON.stringify({
               type: "error",
@@ -661,9 +750,13 @@ export class ChatRoom extends DurableObject {
        * DIRECT MESSAGE
        */
 
-      if (data.type === "dm") {
+      if (
+        data.type === "dm"
+      ) {
         const to =
-          normalizeUsername(data.to);
+          normalizeUsername(
+            data.to
+          );
 
         const text =
           String(data.text || "")
@@ -678,12 +771,15 @@ export class ChatRoom extends DurableObject {
 
         if (
           !text ||
-          text.length > MAX_MESSAGE_LENGTH
+          text.length >
+            MAX_MESSAGE_LENGTH
         ) {
           return;
         }
 
-        if (containsBadWord(text)) {
+        if (
+          containsBadWord(text)
+        ) {
           ws.send(
             JSON.stringify({
               type: "error",
@@ -694,10 +790,6 @@ export class ChatRoom extends DurableObject {
 
           return;
         }
-
-        /*
-         * Target account exists?
-         */
 
         const target =
           await this.ctx.storage.get(
@@ -717,15 +809,23 @@ export class ChatRoom extends DurableObject {
         }
 
         const messageObject = {
-          id: crypto.randomUUID(),
-          from: username,
-          to: target.username,
+          id:
+            crypto.randomUUID(),
+
+          from:
+            username,
+
+          to:
+            target.username,
+
           text,
-          time: Date.now()
+
+          time:
+            Date.now()
         };
 
         /*
-         * SAVE DM
+         * SAVE
          */
 
         const key =
@@ -735,13 +835,19 @@ export class ChatRoom extends DurableObject {
           );
 
         let history =
-          await this.ctx.storage.get(key);
+          await this.ctx.storage.get(
+            key
+          );
 
-        if (!Array.isArray(history)) {
+        if (
+          !Array.isArray(history)
+        ) {
           history = [];
         }
 
-        history.push(messageObject);
+        history.push(
+          messageObject
+        );
 
         if (
           history.length >
@@ -762,7 +868,8 @@ export class ChatRoom extends DurableObject {
          * SEND TO TARGET
          */
 
-        let delivered = false;
+        let delivered =
+          false;
 
         for (
           const socket
@@ -786,15 +893,17 @@ export class ChatRoom extends DurableObject {
                 })
               );
 
-              delivered = true;
+              delivered =
+                true;
             }
+
           } catch {
-            // ignore disconnected socket
+            // disconnected socket
           }
         }
 
         /*
-         * SEND BACK TO SENDER
+         * SEND TO SENDER
          */
 
         ws.send(
@@ -824,7 +933,9 @@ export class ChatRoom extends DurableObject {
   }
 
   /*
+   * =========================
    * USER LEFT
+   * =========================
    */
 
   webSocketClose(ws) {
@@ -848,7 +959,9 @@ export class ChatRoom extends DurableObject {
   }
 
   /*
+   * =========================
    * ONLINE USERS
+   * =========================
    */
 
   getOnlineUsers() {
@@ -874,6 +987,7 @@ export class ChatRoom extends DurableObject {
         ) {
           users.push(username);
         }
+
       } catch {
         // ignore
       }
@@ -889,10 +1003,15 @@ export class ChatRoom extends DurableObject {
   }
 
   /*
+   * =========================
    * BROADCAST
+   * =========================
    */
 
-  broadcast(data, except = null) {
+  broadcast(
+    data,
+    except = null
+  ) {
     const message =
       JSON.stringify(data);
 
@@ -900,14 +1019,16 @@ export class ChatRoom extends DurableObject {
       const ws
       of this.ctx.getWebSockets()
     ) {
-      if (ws === except) {
+      if (
+        ws === except
+      ) {
         continue;
       }
 
       try {
         ws.send(message);
       } catch {
-        // ignore disconnected sockets
+        // ignore
       }
     }
   }
@@ -915,7 +1036,8 @@ export class ChatRoom extends DurableObject {
   broadcastUsers() {
     this.broadcast({
       type: "users",
-      users: this.getOnlineUsers()
+      users:
+        this.getOnlineUsers()
     });
   }
-          }
+    }
