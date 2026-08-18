@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SamirChat</title>
+
 <style>
 :root{
   --bg:#f6f4ff;
@@ -14,100 +15,1049 @@
   --primary2:#a78bfa;
   --soft:#eeeaff;
   --online:#43d17a;
+  --danger:#e05270;
   --shadow:0 18px 55px rgba(76,62,145,.13);
 }
+
 *{box-sizing:border-box}
+
 body{
-  margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;
-  color:var(--text);background:
-  radial-gradient(circle at 10% 10%,#e9e4ff 0,transparent 32%),
-  radial-gradient(circle at 90% 90%,#ffe8f4 0,transparent 30%),var(--bg);
+  margin:0;
+  font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(circle at 10% 10%,#e9e4ff 0,transparent 32%),
+    radial-gradient(circle at 90% 90%,#ffe8f4 0,transparent 30%),
+    var(--bg);
   min-height:100vh;
 }
-.app{max-width:1180px;margin:auto;padding:24px}
-header{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:16px 20px;margin-bottom:20px;background:var(--card);
-  backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.8);
-  border-radius:24px;box-shadow:var(--shadow)
+
+/* LOGIN */
+
+.login{
+  min-height:100vh;
+  display:grid;
+  place-items:center;
+  padding:20px;
 }
-.logo{display:flex;align-items:center;gap:12px;font-weight:800;font-size:23px}
-.logoMark{width:43px;height:43px;border-radius:15px;display:grid;place-items:center;
-  background:linear-gradient(135deg,var(--primary),var(--primary2));color:white}
-.tiktok{color:#fff;text-decoration:none;background:#191827;padding:11px 16px;border-radius:14px;font-weight:700}
-.layout{display:grid;grid-template-columns:330px 1fr;gap:20px}
-.panel,.chat{background:var(--card);backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.8);box-shadow:var(--shadow);border-radius:26px}
-.panel{padding:20px}
-.search{width:100%;padding:14px 16px;border:0;outline:0;background:#f1effa;border-radius:15px;font-size:15px}
-.title{margin:20px 0 12px;font-weight:800}
-.user{display:flex;align-items:center;gap:12px;padding:13px;border-radius:17px;cursor:pointer}
-.user:hover{background:var(--soft)}
-.avatar{width:45px;height:45px;border-radius:15px;display:grid;place-items:center;color:white;font-weight:800;background:linear-gradient(135deg,#8b7cf6,#c59cff)}
-.user b{display:block}.user small{color:var(--muted)}
-.chat{min-height:650px;display:flex;flex-direction:column;overflow:hidden}
-.chatHead{padding:20px 24px;border-bottom:1px solid #eeeaf8;display:flex;align-items:center;gap:13px}
-.dot{width:10px;height:10px;border-radius:50%;background:var(--online);display:inline-block;margin-left:4px}
-.messages{flex:1;padding:28px;display:flex;flex-direction:column;gap:13px}
-.msg{max-width:65%;padding:13px 16px;border-radius:19px;line-height:1.4}
-.them{background:#eeeaf9;align-self:flex-start;border-bottom-left-radius:6px}
-.me{background:linear-gradient(135deg,var(--primary),#9b82f7);color:white;align-self:flex-end;border-bottom-right-radius:6px}
-.time{font-size:11px;opacity:.62;margin-top:4px}
-.composer{display:flex;gap:10px;padding:17px;border-top:1px solid #eeeaf8}
-.composer input{flex:1;border:0;outline:0;background:#f1effa;border-radius:16px;padding:14px}
-.send{border:0;color:white;background:var(--primary);padding:0 20px;border-radius:16px;font-weight:800;cursor:pointer}
-.welcome{margin:auto;text-align:center;padding:30px}
-.welcomeIcon{font-size:55px}
-@media(max-width:800px){.layout{grid-template-columns:1fr}.panel{display:none}.chat{min-height:75vh}.app{padding:12px}.msg{max-width:82%}}
+
+.loginCard{
+  width:min(430px,100%);
+  background:var(--card);
+  backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,.8);
+  border-radius:28px;
+  padding:35px;
+  box-shadow:var(--shadow);
+  text-align:center;
+}
+
+.loginLogo{
+  width:65px;
+  height:65px;
+  border-radius:20px;
+  display:grid;
+  place-items:center;
+  margin:0 auto 18px;
+  background:linear-gradient(135deg,var(--primary),var(--primary2));
+  color:white;
+  font-size:30px;
+  font-weight:900;
+}
+
+.loginCard h1{
+  margin:0 0 8px;
+}
+
+.loginCard p{
+  color:var(--muted);
+  margin-bottom:25px;
+}
+
+.usernameInput{
+  width:100%;
+  padding:16px;
+  border:0;
+  outline:0;
+  background:#f1effa;
+  border-radius:16px;
+  font-size:16px;
+  margin-bottom:12px;
+}
+
+.loginButton{
+  width:100%;
+  border:0;
+  padding:16px;
+  border-radius:16px;
+  background:var(--primary);
+  color:white;
+  font-size:16px;
+  font-weight:800;
+  cursor:pointer;
+}
+
+.loginButton:disabled{
+  opacity:.6;
+}
+
+.error{
+  color:var(--danger);
+  font-size:14px;
+  min-height:20px;
+  margin-bottom:8px;
+}
+
+/* APP */
+
+.app{
+  max-width:1180px;
+  margin:auto;
+  padding:24px;
+}
+
+header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:16px 20px;
+  margin-bottom:20px;
+  background:var(--card);
+  backdrop-filter:blur(18px);
+  border:1px solid rgba(255,255,255,.8);
+  border-radius:24px;
+  box-shadow:var(--shadow);
+}
+
+.logo{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  font-weight:800;
+  font-size:23px;
+}
+
+.logoMark{
+  width:43px;
+  height:43px;
+  border-radius:15px;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(135deg,var(--primary),var(--primary2));
+  color:white;
+}
+
+.tiktok{
+  color:#fff;
+  text-decoration:none;
+  background:#191827;
+  padding:11px 16px;
+  border-radius:14px;
+  font-weight:700;
+}
+
+.layout{
+  display:grid;
+  grid-template-columns:330px 1fr;
+  gap:20px;
+}
+
+.panel,
+.chat{
+  background:var(--card);
+  backdrop-filter:blur(18px);
+  border:1px solid rgba(255,255,255,.8);
+  box-shadow:var(--shadow);
+  border-radius:26px;
+}
+
+.panel{
+  padding:20px;
+}
+
+.search{
+  width:100%;
+  padding:14px 16px;
+  border:0;
+  outline:0;
+  background:#f1effa;
+  border-radius:15px;
+  font-size:15px;
+}
+
+.title{
+  margin:20px 0 12px;
+  font-weight:800;
+}
+
+.user{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:13px;
+  border-radius:17px;
+}
+
+.avatar{
+  width:45px;
+  height:45px;
+  min-width:45px;
+  border-radius:15px;
+  display:grid;
+  place-items:center;
+  color:white;
+  font-weight:800;
+  background:linear-gradient(135deg,#8b7cf6,#c59cff);
+}
+
+.user b{
+  display:block;
+}
+
+.user small{
+  color:var(--muted);
+}
+
+.chat{
+  min-height:650px;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+.chatHead{
+  padding:20px 24px;
+  border-bottom:1px solid #eeeaf8;
+  display:flex;
+  align-items:center;
+  gap:13px;
+}
+
+.dot{
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:var(--online);
+  display:inline-block;
+  margin-left:4px;
+}
+
+.messages{
+  flex:1;
+  padding:28px;
+  display:flex;
+  flex-direction:column;
+  gap:13px;
+  overflow-y:auto;
+}
+
+.msg{
+  max-width:65%;
+  padding:13px 16px;
+  border-radius:19px;
+  line-height:1.4;
+  word-break:break-word;
+}
+
+.them{
+  background:#eeeaf9;
+  align-self:flex-start;
+  border-bottom-left-radius:6px;
+}
+
+.me{
+  background:linear-gradient(135deg,var(--primary),#9b82f7);
+  color:white;
+  align-self:flex-end;
+  border-bottom-right-radius:6px;
+}
+
+.msgName{
+  font-size:12px;
+  font-weight:800;
+  margin-bottom:4px;
+  opacity:.7;
+}
+
+.time{
+  font-size:11px;
+  opacity:.62;
+  margin-top:4px;
+}
+
+.system{
+  align-self:center;
+  color:var(--muted);
+  font-size:12px;
+  text-align:center;
+}
+
+.composer{
+  display:flex;
+  gap:10px;
+  padding:17px;
+  border-top:1px solid #eeeaf8;
+}
+
+.composer input{
+  flex:1;
+  border:0;
+  outline:0;
+  background:#f1effa;
+  border-radius:16px;
+  padding:14px;
+  font-size:15px;
+}
+
+.send{
+  border:0;
+  color:white;
+  background:var(--primary);
+  padding:0 20px;
+  border-radius:16px;
+  font-weight:800;
+  cursor:pointer;
+}
+
+.send:disabled{
+  opacity:.5;
+}
+
+.empty{
+  margin:auto;
+  text-align:center;
+  color:var(--muted);
+}
+
+.emptyIcon{
+  font-size:55px;
+  margin-bottom:10px;
+}
+
+@media(max-width:800px){
+  .layout{
+    grid-template-columns:1fr;
+  }
+
+  .panel{
+    display:none;
+  }
+
+  .chat{
+    min-height:75vh;
+  }
+
+  .app{
+    padding:12px;
+  }
+
+  .msg{
+    max-width:82%;
+  }
+
+  .tiktok{
+    padding:9px 11px;
+    font-size:13px;
+  }
+}
 </style>
 </head>
+
 <body>
-<div class="app">
+
+<!-- USERNAME SCREEN -->
+
+<section class="login" id="loginScreen">
+
+  <div class="loginCard">
+
+    <div class="loginLogo">S</div>
+
+    <h1>SamirChat</h1>
+
+    <p>
+      Username seç və dostlarınla real vaxtda söhbət et.
+    </p>
+
+    <input
+      id="usernameInput"
+      class="usernameInput"
+      maxlength="20"
+      autocomplete="off"
+      placeholder="Username daxil et..."
+    >
+
+    <div id="loginError" class="error"></div>
+
+    <button id="loginButton" class="loginButton">
+      Çata daxil ol
+    </button>
+
+  </div>
+
+</section>
+
+
+<!-- CHAT APP -->
+
+<div class="app" id="chatApp" style="display:none">
+
 <header>
-  <div class="logo"><div class="logoMark">S</div>SamirChat</div>
-  <a class="tiktok" href="https://www.tiktok.com/@ssamirreds" target="_blank">TikTok · @ssamirreds</a>
+
+  <div class="logo">
+    <div class="logoMark">S</div>
+    SamirChat
+  </div>
+
+  <a
+    class="tiktok"
+    href="https://www.tiktok.com/@ssamirreds"
+    target="_blank"
+    rel="noopener"
+  >
+    TikTok · @ssamirreds
+  </a>
+
 </header>
 
+
 <div class="layout">
+
+<!-- USERS -->
+
 <aside class="panel">
-  <input class="search" placeholder="🔎 Username axtar...">
-  <div class="title">Söhbətlər</div>
-  <div class="user"><div class="avatar">E</div><div><b>@elvin</b><small>Salam, necəsən? · 2 dəq</small></div></div>
-  <div class="user"><div class="avatar">A</div><div><b>@ali</b><small>Sabah görüşürük? · 8 dəq</small></div></div>
-  <div class="user"><div class="avatar">M</div><div><b>@murad</b><small>😂😂 · 21 dəq</small></div></div>
+
+  <input
+    id="searchInput"
+    class="search"
+    placeholder="🔎 Username axtar..."
+    autocomplete="off"
+  >
+
+  <div class="title">
+    Online istifadəçilər
+  </div>
+
+  <div id="usersList"></div>
+
 </aside>
 
+
+<!-- CHAT -->
+
 <main class="chat">
+
   <div class="chatHead">
-    <div class="avatar">E</div>
-    <div><b>@elvin</b><div style="color:var(--muted);font-size:13px">online <span class="dot"></span></div></div>
-  </div>
-  <div class="messages">
-    <div class="welcome">
-      <div class="welcomeIcon">💬</div>
-      <h2>SamirChat-a xoş gəlmisən</h2>
-      <p style="color:var(--muted)">Username ilə dostlarını tap və rahat söhbət et.</p>
+
+    <div class="avatar" id="chatAvatar">
+      S
     </div>
-    <div class="msg them">Salam, Samir! 👋<div class="time">14:01</div></div>
-    <div class="msg me">Salam 😄 SamirChat necə görünür?<div class="time">14:02</div></div>
+
+    <div>
+
+      <b>SamirChat</b>
+
+      <div style="color:var(--muted);font-size:13px">
+        <span id="connectionText">
+          qoşulur...
+        </span>
+
+        <span class="dot"></span>
+      </div>
+
+    </div>
+
   </div>
+
+
+  <div class="messages" id="messages">
+
+    <div class="empty" id="emptyMessage">
+
+      <div class="emptyIcon">
+        💬
+      </div>
+
+      <h2>SamirChat-a xoş gəlmisən</h2>
+
+      <p>
+        Username ilə dostlarını tap və rahat söhbət et.
+      </p>
+
+    </div>
+
+  </div>
+
+
   <div class="composer">
-    <input placeholder="Mesaj yaz..." id="message">
-    <button class="send" onclick="send()">Göndər</button>
+
+    <input
+      id="messageInput"
+      maxlength="500"
+      autocomplete="off"
+      placeholder="Mesaj yaz..."
+    >
+
+    <button
+      class="send"
+      id="sendButton"
+    >
+      Göndər
+    </button>
+
   </div>
+
 </main>
+
 </div>
+
 </div>
+
+
 <script>
-function send(){
- const i=document.getElementById('message');
- if(!i.value.trim()) return;
- const box=document.querySelector('.messages');
- const m=document.createElement('div');
- m.className='msg me';
- m.innerHTML=i.value.replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))+'<div class="time">indi</div>';
- box.appendChild(m); i.value=''; box.scrollTop=box.scrollHeight;
+
+const loginScreen =
+  document.getElementById("loginScreen");
+
+const chatApp =
+  document.getElementById("chatApp");
+
+const usernameInput =
+  document.getElementById("usernameInput");
+
+const loginButton =
+  document.getElementById("loginButton");
+
+const loginError =
+  document.getElementById("loginError");
+
+const messageInput =
+  document.getElementById("messageInput");
+
+const sendButton =
+  document.getElementById("sendButton");
+
+const messages =
+  document.getElementById("messages");
+
+const usersList =
+  document.getElementById("usersList");
+
+const searchInput =
+  document.getElementById("searchInput");
+
+const connectionText =
+  document.getElementById("connectionText");
+
+const chatAvatar =
+  document.getElementById("chatAvatar");
+
+let username = "";
+let socket = null;
+
+
+/* USERNAME */
+
+loginButton.addEventListener(
+  "click",
+  login
+);
+
+usernameInput.addEventListener(
+  "keydown",
+  function(e){
+
+    if(e.key === "Enter"){
+      login();
+    }
+
+  }
+);
+
+
+async function login(){
+
+  const value =
+    usernameInput.value.trim();
+
+  loginError.textContent = "";
+
+  if(
+    !/^[A-Za-z0-9_]{3,20}$/.test(value)
+  ){
+
+    loginError.textContent =
+      "Username 3-20 simvol olmalıdır. Yalnız hərf, rəqəm və _ istifadə edə bilərsən.";
+
+    return;
+  }
+
+
+  loginButton.disabled = true;
+
+  loginButton.textContent =
+    "Yoxlanılır...";
+
+
+  try{
+
+    const response =
+      await fetch(
+        "/api/register",
+        {
+          method:"POST",
+
+          headers:{
+            "Content-Type":
+              "application/json"
+          },
+
+          body:JSON.stringify({
+            username:value
+          })
+        }
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if(!data.ok){
+
+      loginError.textContent =
+        data.error ||
+        "Bu username istifadə edilə bilmir.";
+
+      return;
+    }
+
+
+    username =
+      data.username;
+
+
+    chatAvatar.textContent =
+      username
+        .charAt(0)
+        .toUpperCase();
+
+
+    loginScreen.style.display =
+      "none";
+
+    chatApp.style.display =
+      "block";
+
+
+    connect();
+
+
+  }catch(error){
+
+    loginError.textContent =
+      "Serverə qoşulmaq mümkün olmadı.";
+
+  }finally{
+
+    loginButton.disabled =
+      false;
+
+    loginButton.textContent =
+      "Çata daxil ol";
+
+  }
+
 }
-document.getElementById('message').addEventListener('keydown',e=>{if(e.key==='Enter')send()});
+
+
+/* WEBSOCKET */
+
+function connect(){
+
+  const protocol =
+    location.protocol === "https:"
+      ? "wss:"
+      : "ws:";
+
+
+  socket =
+    new WebSocket(
+      protocol +
+      "//" +
+      location.host +
+      "/ws?username=" +
+      encodeURIComponent(username)
+    );
+
+
+  socket.addEventListener(
+    "open",
+    function(){
+
+      connectionText.textContent =
+        "online";
+
+      addSystem(
+        "Serverə qoşuldun."
+      );
+
+    }
+  );
+
+
+  socket.addEventListener(
+    "message",
+    function(event){
+
+      try{
+
+        const data =
+          JSON.parse(event.data);
+
+
+        if(data.type === "welcome"){
+
+          updateUsers(
+            data.users || []
+          );
+
+        }
+
+
+        if(data.type === "users"){
+
+          updateUsers(
+            data.users || []
+          );
+
+        }
+
+
+        if(data.type === "message"){
+
+          addMessage(
+            data.username,
+            data.text,
+            data.time
+          );
+
+        }
+
+
+        if(data.type === "system"){
+
+          addSystem(
+            data.text
+          );
+
+        }
+
+      }catch(error){
+
+        console.log(
+          "Message error",
+          error
+        );
+
+      }
+
+    }
+  );
+
+
+  socket.addEventListener(
+    "close",
+    function(){
+
+      connectionText.textContent =
+        "offline";
+
+      addSystem(
+        "Serverlə əlaqə kəsildi."
+      );
+
+    }
+  );
+
+}
+
+
+/* SEND */
+
+sendButton.addEventListener(
+  "click",
+  sendMessage
+);
+
+
+messageInput.addEventListener(
+  "keydown",
+  function(e){
+
+    if(e.key === "Enter"){
+      sendMessage();
+    }
+
+  }
+);
+
+
+function sendMessage(){
+
+  const text =
+    messageInput.value.trim();
+
+
+  if(!text){
+    return;
+  }
+
+
+  if(
+    !socket ||
+    socket.readyState !==
+      WebSocket.OPEN
+  ){
+
+    addSystem(
+      "Serverə qoşulu deyilsən."
+    );
+
+    return;
+  }
+
+
+  socket.send(
+    JSON.stringify({
+      type:"message",
+      text:text
+    })
+  );
+
+
+  messageInput.value = "";
+
+  messageInput.focus();
+
+}
+
+
+/* ADD MESSAGE */
+
+function addMessage(
+  sender,
+  text,
+  timestamp
+){
+
+  const empty =
+    document.getElementById(
+      "emptyMessage"
+    );
+
+  if(empty){
+    empty.remove();
+  }
+
+
+  const box =
+    document.createElement("div");
+
+
+  box.className =
+    sender === username
+      ? "msg me"
+      : "msg them";
+
+
+  const name =
+    document.createElement("div");
+
+  name.className =
+    "msgName";
+
+  name.textContent =
+    sender === username
+      ? "Sən"
+      : "@" + sender;
+
+
+  const content =
+    document.createElement("div");
+
+  content.textContent =
+    text;
+
+
+  const time =
+    document.createElement("div");
+
+  time.className =
+    "time";
+
+
+  time.textContent =
+    timestamp
+      ? new Date(timestamp)
+          .toLocaleTimeString(
+            "az-AZ",
+            {
+              hour:"2-digit",
+              minute:"2-digit"
+            }
+          )
+      : "indi";
+
+
+  box.appendChild(name);
+
+  box.appendChild(content);
+
+  box.appendChild(time);
+
+
+  messages.appendChild(box);
+
+  messages.scrollTop =
+    messages.scrollHeight;
+
+}
+
+
+/* SYSTEM MESSAGE */
+
+function addSystem(text){
+
+  const box =
+    document.createElement("div");
+
+  box.className =
+    "system";
+
+  box.textContent =
+    text;
+
+  messages.appendChild(box);
+
+  messages.scrollTop =
+    messages.scrollHeight;
+
+}
+
+
+/* USERS */
+
+function updateUsers(users){
+
+  usersList.innerHTML = "";
+
+
+  if(users.length === 0){
+
+    usersList.innerHTML =
+      '<div style="color:var(--muted);padding:12px">Hazırda heç kim online deyil.</div>';
+
+    return;
+  }
+
+
+  users.forEach(
+    function(user){
+
+      const item =
+        document.createElement("div");
+
+      item.className =
+        "user";
+
+
+      const avatar =
+        document.createElement("div");
+
+      avatar.className =
+        "avatar";
+
+      avatar.textContent =
+        user
+          .charAt(0)
+          .toUpperCase();
+
+
+      const info =
+        document.createElement("div");
+
+
+      const name =
+        document.createElement("b");
+
+      name.textContent =
+        "@" + user;
+
+
+      const status =
+        document.createElement("small");
+
+      status.textContent =
+        user === username
+          ? "Sən · online"
+          : "online";
+
+
+      info.appendChild(name);
+
+      info.appendChild(status);
+
+
+      item.appendChild(avatar);
+
+      item.appendChild(info);
+
+
+      usersList.appendChild(item);
+
+    }
+  );
+
+}
+
+
+/* SEARCH */
+
+searchInput.addEventListener(
+  "input",
+  function(){
+
+    const query =
+      searchInput.value
+        .trim()
+        .toLowerCase();
+
+
+    document
+      .querySelectorAll(
+        "#usersList .user"
+      )
+      .forEach(
+        function(item){
+
+          const text =
+            item.textContent
+              .toLowerCase();
+
+
+          item.style.display =
+            text.includes(query)
+              ? "flex"
+              : "none";
+
+        }
+      );
+
+  }
+);
+
 </script>
+
 </body>
 </html>
