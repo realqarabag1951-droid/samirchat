@@ -13,13 +13,12 @@
 
 body{
   margin:0;
-  font-family:Arial, sans-serif;
+  font-family:Arial,sans-serif;
   background:#f5f3ff;
   color:#25233a;
 }
 
-button,
-input{
+button,input{
   font-family:inherit;
 }
 
@@ -458,10 +457,7 @@ input{
       autocomplete="current-password"
     >
 
-    <div
-      id="error"
-      class="error"
-    ></div>
+    <div id="error" class="error"></div>
 
     <button
       id="authButton"
@@ -487,12 +483,9 @@ input{
 </div>
 
 
-<!-- APP -->
+<!-- CHAT APP -->
 
-<div
-  class="app"
-  id="app"
->
+<div class="app" id="app">
 
   <div class="header">
 
@@ -512,6 +505,7 @@ input{
         class="tiktok"
         href="https://www.tiktok.com/@ssamirreds"
         target="_blank"
+        rel="noopener"
       >
         TikTok
       </a>
@@ -538,6 +532,7 @@ input{
         id="search"
         class="search"
         placeholder="🔎 Username axtar..."
+        autocomplete="off"
       >
 
       <div class="sidebar-title">
@@ -652,6 +647,8 @@ let socket = null;
 
 let selectedUser = null;
 
+let allUsers = [];
+
 
 /* ELEMENTS */
 
@@ -717,60 +714,77 @@ const dot =
    REGISTER / LOGIN SWITCH
 ========================= */
 
-switchButton.onclick = () => {
+switchButton.addEventListener(
+  "click",
+  function(){
 
-  registerMode =
-    !registerMode;
+    registerMode =
+      !registerMode;
 
-  errorBox.textContent = "";
+    errorBox.textContent = "";
 
-  usernameInput.value = "";
-  codeInput.value = "";
+    usernameInput.value = "";
+    codeInput.value = "";
 
-  if(registerMode){
+    if(registerMode){
 
-    loginText.textContent =
-      "Hesabını yarat və söhbətə başla.";
+      loginText.textContent =
+        "Hesabını yarat və söhbətə başla.";
 
-    authButton.textContent =
-      "Hesab yarat";
+      authButton.textContent =
+        "Hesab yarat";
 
-    switchText.textContent =
-      "Artıq hesabın var?";
+      switchText.textContent =
+        "Artıq hesabın var?";
 
-    switchButton.textContent =
-      "Hesaba daxil ol";
+      switchButton.textContent =
+        "Hesaba daxil ol";
 
-  }else{
+    }else{
 
-    loginText.textContent =
-      "Username və kodunla hesabına daxil ol.";
+      loginText.textContent =
+        "Username və kodunla hesabına daxil ol.";
 
-    authButton.textContent =
-      "Hesaba daxil ol";
+      authButton.textContent =
+        "Hesaba daxil ol";
 
-    switchText.textContent =
-      "Hesabın yoxdur?";
+      switchText.textContent =
+        "Hesabın yoxdur?";
 
-    switchButton.textContent =
-      "Hesab yarat";
+      switchButton.textContent =
+        "Hesab yarat";
+
+    }
 
   }
-
-};
+);
 
 
 /* =========================
-   AUTH
+   AUTH BUTTON
 ========================= */
 
-authButton.onclick =
-  authenticate;
+authButton.addEventListener(
+  "click",
+  authenticate
+);
+
+
+usernameInput.addEventListener(
+  "keydown",
+  function(e){
+
+    if(e.key === "Enter"){
+      codeInput.focus();
+    }
+
+  }
+);
 
 
 codeInput.addEventListener(
   "keydown",
-  e => {
+  function(e){
 
     if(e.key === "Enter"){
       authenticate();
@@ -780,17 +794,9 @@ codeInput.addEventListener(
 );
 
 
-usernameInput.addEventListener(
-  "keydown",
-  e => {
-
-    if(e.key === "Enter"){
-      codeInput.focus();
-    }
-
-  }
-);
-
+/* =========================
+   AUTHENTICATE
+========================= */
 
 async function authenticate(){
 
@@ -859,15 +865,48 @@ async function authenticate(){
       );
 
 
-    const data =
-      await response.json();
+    const text =
+      await response.text();
 
 
-    if(!response.ok || !data.ok){
+    let data;
+
+    try{
+
+      data =
+        JSON.parse(text);
+
+    }catch{
+
+      data = {
+        ok:false,
+        error:
+          "Server düzgün cavab qaytarmadı."
+      };
+
+    }
+
+
+    if(
+      !response.ok ||
+      !data.ok
+    ){
 
       errorBox.textContent =
         data.error ||
-        "Xəta baş verdi.";
+        "Əməliyyat uğursuz oldu.";
+
+      return;
+    }
+
+
+    if(
+      !data.username ||
+      !data.token
+    ){
+
+      errorBox.textContent =
+        "Server token göndərmədi.";
 
       return;
     }
@@ -893,16 +932,21 @@ async function authenticate(){
 
     openApp();
 
+
   }catch(error){
 
-    console.error(error);
+    console.error(
+      "AUTH ERROR:",
+      error
+    );
 
     errorBox.textContent =
       "Serverə qoşulmaq mümkün olmadı.";
 
   }finally{
 
-    authButton.disabled = false;
+    authButton.disabled =
+      false;
 
     authButton.textContent =
       registerMode
@@ -931,7 +975,10 @@ function checkLogin(){
     );
 
 
-  if(savedName && savedToken){
+  if(
+    savedName &&
+    savedToken
+  ){
 
     currentUsername =
       savedName;
@@ -958,10 +1005,12 @@ function openApp(){
   app.style.display =
     "block";
 
+
   chatAvatar.textContent =
     currentUsername
       .charAt(0)
       .toUpperCase();
+
 
   connect();
 
@@ -969,13 +1018,22 @@ function openApp(){
 
 
 /* =========================
-   WEBSOCKET
+   CONNECT WEBSOCKET
 ========================= */
 
 function connect(){
 
   if(!currentToken){
     return;
+  }
+
+
+  if(socket){
+
+    try{
+      socket.close();
+    }catch{}
+
   }
 
 
@@ -997,135 +1055,190 @@ function connect(){
     );
 
 
-  socket.onopen = () => {
+  socket.addEventListener(
+    "open",
+    function(){
 
-    dot.classList.add("online");
+      dot.classList.add(
+        "online"
+      );
 
-    chatSubtitle.textContent =
-      "Online";
-
-  };
-
-
-  socket.onmessage = event => {
-
-    try{
-
-      const data =
-        JSON.parse(event.data);
-
-
-      if(data.type === "welcome"){
-
-        updateUsers(
-          data.users || []
-        );
-
-      }
-
-
-      if(data.type === "users"){
-
-        updateUsers(
-          data.users || []
-        );
-
-      }
-
-
-      if(data.type === "message"){
-
-        if(!selectedUser){
-
-          addMessage(
-            data.username,
-            data.text,
-            data.time
-          );
-
-        }
-
-      }
-
-
-      if(data.type === "dm"){
-
-        if(!selectedUser){
-          return;
-        }
-
-
-        const belongs =
-          (
-            data.from.toLowerCase() ===
-              selectedUser.toLowerCase()
-          &&
-            data.to.toLowerCase() ===
-              currentUsername.toLowerCase()
-          )
-          ||
-          (
-            data.to.toLowerCase() ===
-              selectedUser.toLowerCase()
-          &&
-            data.from.toLowerCase() ===
-              currentUsername.toLowerCase()
-          );
-
-
-        if(belongs){
-
-          addMessage(
-            data.from,
-            data.text,
-            data.time
-          );
-
-        }
-
-      }
-
-
-      if(data.type === "system"){
-
-        if(!selectedUser){
-
-          addSystem(
-            data.text
-          );
-
-        }
-
-      }
-
-
-      if(data.type === "error"){
-
-        addSystem(
-          data.error
-        );
-
-      }
-
-    }catch(error){
-
-      console.error(error);
+      chatSubtitle.textContent =
+        "Online";
 
     }
+  );
 
-  };
+
+  socket.addEventListener(
+    "message",
+    function(event){
+
+      try{
+
+        const data =
+          JSON.parse(event.data);
 
 
-  socket.onclose = () => {
+        if(
+          data.type === "welcome"
+        ){
 
-    dot.classList.remove(
-      "online"
-    );
+          updateUsers(
+            data.users || []
+          );
 
-    chatSubtitle.textContent =
-      "Offline";
+        }
 
-  };
+
+        if(
+          data.type === "users"
+        ){
+
+          updateUsers(
+            data.users || []
+          );
+
+        }
+
+
+        if(
+          data.type === "message"
+        ){
+
+          if(!selectedUser){
+
+            addMessage(
+              data.username,
+              data.text,
+              data.time
+            );
+
+          }
+
+        }
+
+
+        if(
+          data.type === "dm"
+        ){
+
+          if(!selectedUser){
+            return;
+          }
+
+
+          const from =
+            String(
+              data.from || ""
+            ).toLowerCase();
+
+          const to =
+            String(
+              data.to || ""
+            ).toLowerCase();
+
+          const selected =
+            String(
+              selectedUser || ""
+            ).toLowerCase();
+
+          const me =
+            currentUsername
+              .toLowerCase();
+
+
+          const belongs =
+            (
+              from === selected &&
+              to === me
+            )
+            ||
+            (
+              from === me &&
+              to === selected
+            );
+
+
+          if(belongs){
+
+            addMessage(
+              data.from,
+              data.text,
+              data.time
+            );
+
+          }
+
+        }
+
+
+        if(
+          data.type === "system"
+        ){
+
+          if(!selectedUser){
+
+            addSystem(
+              data.text
+            );
+
+          }
+
+        }
+
+
+        if(
+          data.type === "error"
+        ){
+
+          addSystem(
+            data.error
+          );
+
+        }
+
+      }catch(error){
+
+        console.error(
+          "MESSAGE ERROR:",
+          error
+        );
+
+      }
+
+    }
+  );
+
+
+  socket.addEventListener(
+    "close",
+    function(){
+
+      dot.classList.remove(
+        "online"
+      );
+
+      chatSubtitle.textContent =
+        "Offline";
+
+    }
+  );
+
+
+  socket.addEventListener(
+    "error",
+    function(){
+
+      dot.classList.remove(
+        "online"
+      );
+
+      chatSubtitle.textContent =
+        "Bağlantı xətası";
+
+    }
+  );
 
 }
 
@@ -1134,17 +1247,19 @@ function connect(){
    USERS
 ========================= */
 
-let allUsers = [];
-
-
 function updateUsers(list){
 
   allUsers =
     list.filter(
-      name =>
-        name.toLowerCase() !==
-        currentUsername.toLowerCase()
+      function(name){
+
+        return String(name)
+          .toLowerCase() !==
+          currentUsername.toLowerCase();
+
+      }
     );
+
 
   renderUsers();
 
@@ -1164,81 +1279,105 @@ function renderUsers(){
 
   const filtered =
     allUsers.filter(
-      name =>
-        name.toLowerCase()
-          .includes(search)
+      function(name){
+
+        return String(name)
+          .toLowerCase()
+          .includes(search);
+
+      }
     );
 
 
-  if(filtered.length === 0){
+  if(
+    filtered.length === 0
+  ){
 
     usersBox.innerHTML =
       "<div style='color:#888;font-size:13px;padding:10px'>Online istifadəçi yoxdur.</div>";
 
     return;
+
   }
 
 
-  filtered.forEach(name => {
+  filtered.forEach(
+    function(name){
 
-    const user =
-      document.createElement("div");
+      const user =
+        document.createElement(
+          "div"
+        );
 
-    user.className =
-      "user";
-
-
-    const avatar =
-      document.createElement("div");
-
-    avatar.className =
-      "avatar";
-
-    avatar.textContent =
-      name.charAt(0).toUpperCase();
+      user.className =
+        "user";
 
 
-    const info =
-      document.createElement("div");
+      const avatar =
+        document.createElement(
+          "div"
+        );
+
+      avatar.className =
+        "avatar";
+
+      avatar.textContent =
+        String(name)
+          .charAt(0)
+          .toUpperCase();
 
 
-    const title =
-      document.createElement("div");
-
-    title.className =
-      "user-name";
-
-    title.textContent =
-      "@" + name;
+      const info =
+        document.createElement(
+          "div"
+        );
 
 
-    const status =
-      document.createElement("div");
+      const title =
+        document.createElement(
+          "div"
+        );
 
-    status.className =
-      "user-status";
+      title.className =
+        "user-name";
 
-    status.textContent =
-      "Online";
-
-
-    info.appendChild(title);
-    info.appendChild(status);
-
-    user.appendChild(avatar);
-    user.appendChild(info);
+      title.textContent =
+        "@" + name;
 
 
-    user.onclick = () => {
+      const status =
+        document.createElement(
+          "div"
+        );
 
-      openDM(name);
+      status.className =
+        "user-status";
 
-    };
+      status.textContent =
+        "Online";
 
 
-    usersBox.appendChild(user);
+      info.appendChild(title);
+      info.appendChild(status);
 
-  });
+      user.appendChild(avatar);
+      user.appendChild(info);
+
+
+      user.addEventListener(
+        "click",
+        function(){
+
+          openDM(name);
+
+        }
+      );
+
+
+      usersBox.appendChild(user);
+
+    }
+  );
 
 }
 
@@ -1256,6 +1395,7 @@ searchInput.addEventListener(
 function showGeneral(){
 
   selectedUser = null;
+
 
   chatTitle.textContent =
     "Ümumi söhbət";
@@ -1311,13 +1451,10 @@ function openDM(name){
     "Şəxsi mesaj";
 
   chatAvatar.textContent =
-    name.charAt(0).toUpperCase();
+    String(name)
+      .charAt(0)
+      .toUpperCase();
 
-
-  /*
-  DM TARİXÇƏSİ QƏSDƏN
-  SERVERDƏN YÜKLƏNMİR.
-  */
 
   messages.innerHTML = `
 
@@ -1331,9 +1468,7 @@ function openDM(name){
         👋
       </div>
 
-      <h2>
-        @${escapeHtml(name)}
-      </h2>
+      <h2></h2>
 
       <p>
         Mesajını yaz və göndər.
@@ -1343,164 +1478,18 @@ function openDM(name){
 
   `;
 
+
+  const heading =
+    messages.querySelector(
+      ".empty h2"
+    );
+
+  heading.textContent =
+    "@" + name;
+
 }
 
 
 /* =========================
    SEND
-========================= */
-
-sendButton.onclick =
-  sendMessage;
-
-
-messageInput.addEventListener(
-  "keydown",
-  e => {
-
-    if(e.key === "Enter"){
-
-      sendMessage();
-
-    }
-
-  }
-);
-
-
-function sendMessage(){
-
-  const text =
-    messageInput.value.trim();
-
-
-  if(!text){
-    return;
-  }
-
-
-  if(
-    !socket ||
-    socket.readyState !==
-      WebSocket.OPEN
-  ){
-
-    addSystem(
-      "Serverə qoşulu deyilsən."
-    );
-
-    return;
-  }
-
-
-  if(selectedUser){
-
-    socket.send(
-      JSON.stringify({
-        type:"dm",
-        to:selectedUser,
-        text:text
-      })
-    );
-
-  }else{
-
-    socket.send(
-      JSON.stringify({
-        type:"message",
-        text:text
-      })
-    );
-
-  }
-
-
-  messageInput.value = "";
-
-}
-
-
-/* =========================
-   ADD MESSAGE
-========================= */
-
-function addMessage(
-  name,
-  text,
-  time
-){
-
-  const empty =
-    messages.querySelector(".empty");
-
-  if(empty){
-    empty.remove();
-  }
-
-
-  const box =
-    document.createElement("div");
-
-
-  box.className =
-    "message " +
-    (
-      name.toLowerCase() ===
-      currentUsername.toLowerCase()
-        ? "me"
-        : "other"
-    );
-
-
-  const sender =
-    document.createElement("div");
-
-  sender.className =
-    "message-name";
-
-  sender.textContent =
-    "@" + name;
-
-
-  const content =
-    document.createElement("div");
-
-  content.textContent =
-    text;
-
-
-  const clock =
-    document.createElement("div");
-
-  clock.className =
-    "message-time";
-
-  clock.textContent =
-    new Date(time || Date.now())
-      .toLocaleTimeString(
-        "az-AZ",
-        {
-          hour:"2-digit",
-          minute:"2-digit"
-        }
-      );
-
-
-  box.appendChild(sender);
-  box.appendChild(content);
-  box.appendChild(clock);
-
-
-  messages.appendChild(box);
-
-  messages.scrollTop =
-    messages.scrollHeight;
-
-}
-
-
-/* =========================
-   SYSTEM
-========================= */
-
-fun
+======
