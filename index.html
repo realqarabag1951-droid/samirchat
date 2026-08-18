@@ -3,614 +3,739 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
+
 <title>SamirChat</title>
 
 <style>
-*{box-sizing:border-box}
-
 :root{
---bg:#f6f4ff;
---card:rgba(255,255,255,.84);
---text:#25233a;
---muted:#817e99;
---primary:#7c6cf2;
---primary2:#a78bfa;
---soft:#eeeaff;
---green:#43d17a;
---red:#e05270;
---shadow:0 18px 55px rgba(76,62,145,.13)
+  --bg:#f6f4ff;
+  --card:rgba(255,255,255,.88);
+  --text:#25233a;
+  --muted:#817e99;
+  --primary:#7c6cf2;
+  --primary2:#a78bfa;
+  --soft:#eeeaff;
+  --green:#43d17a;
+  --red:#df5270;
+  --shadow:0 18px 55px rgba(76,62,145,.13);
+}
+
+*{
+  box-sizing:border-box;
 }
 
 body{
-margin:0;
-font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;
-color:var(--text);
-background:
-radial-gradient(circle at 10% 10%,#e9e4ff 0,transparent 32%),
-radial-gradient(circle at 90% 90%,#ffe8f4 0,transparent 30%),
-var(--bg);
-min-height:100vh
+  margin:0;
+  font-family:Inter,system-ui,-apple-system,
+  BlinkMacSystemFont,"Segoe UI",sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(
+      circle at 10% 10%,
+      #e9e4ff 0,
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at 90% 90%,
+      #ffe8f4 0,
+      transparent 30%
+    ),
+    var(--bg);
+  min-height:100vh;
 }
 
-button,input{
-font:inherit
-}
-
-/* LOGIN */
+/* ================= LOGIN ================= */
 
 .login{
-min-height:100vh;
-display:grid;
-place-items:center;
-padding:20px
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
 }
 
-.loginCard{
-width:min(430px,100%);
-background:var(--card);
-backdrop-filter:blur(20px);
-border:1px solid rgba(255,255,255,.8);
-border-radius:28px;
-padding:35px;
-box-shadow:var(--shadow);
-text-align:center
+.login-card{
+  width:min(430px,100%);
+  background:var(--card);
+  backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,.8);
+  border-radius:28px;
+  padding:32px;
+  box-shadow:var(--shadow);
+  text-align:center;
 }
 
-.loginLogo{
-width:65px;
-height:65px;
-border-radius:20px;
-display:grid;
-place-items:center;
-margin:0 auto 18px;
-background:linear-gradient(135deg,var(--primary),var(--primary2));
-color:white;
-font-size:30px;
-font-weight:900
+.logo-big{
+  width:70px;
+  height:70px;
+  margin:0 auto 18px;
+  border-radius:22px;
+  display:grid;
+  place-items:center;
+  color:white;
+  font-size:32px;
+  font-weight:900;
+  background:
+    linear-gradient(
+      135deg,
+      var(--primary),
+      var(--primary2)
+    );
 }
 
-.loginCard h1{
-margin:0 0 8px
+.login-card h1{
+  margin:0;
+  font-size:30px;
 }
 
-.loginCard p{
-color:var(--muted);
-margin-bottom:25px
+.login-card p{
+  color:var(--muted);
+  margin:8px 0 24px;
 }
 
-.input{
-width:100%;
-padding:16px;
-border:0;
-outline:0;
-background:#f1effa;
-border-radius:16px;
-font-size:16px;
-margin-bottom:12px
+.tabs{
+  display:flex;
+  gap:8px;
+  background:#eeeaf8;
+  padding:5px;
+  border-radius:15px;
+  margin-bottom:20px;
 }
 
-.loginButton{
-width:100%;
-border:0;
-padding:16px;
-border-radius:16px;
-background:var(--primary);
-color:white;
-font-weight:800;
-cursor:pointer
+.tab{
+  flex:1;
+  border:0;
+  padding:12px;
+  border-radius:11px;
+  background:transparent;
+  cursor:pointer;
+  font-weight:800;
+  color:var(--muted);
 }
 
-.loginButton:disabled{
-opacity:.6
+.tab.active{
+  background:white;
+  color:var(--primary);
+  box-shadow:0 4px 15px rgba(0,0,0,.06);
+}
+
+.field{
+  text-align:left;
+  margin-bottom:13px;
+}
+
+.field label{
+  display:block;
+  font-size:13px;
+  font-weight:800;
+  margin-bottom:7px;
+}
+
+.field input{
+  width:100%;
+  border:0;
+  outline:0;
+  padding:15px;
+  border-radius:15px;
+  background:#f1effa;
+  font-size:15px;
+}
+
+.code-info{
+  text-align:left;
+  color:var(--muted);
+  font-size:12px;
+  margin:-5px 0 14px;
+}
+
+.main-btn{
+  width:100%;
+  border:0;
+  padding:15px;
+  border-radius:15px;
+  background:var(--primary);
+  color:white;
+  font-size:16px;
+  font-weight:800;
+  cursor:pointer;
+}
+
+.main-btn:disabled{
+  opacity:.6;
+  cursor:not-allowed;
 }
 
 .error{
-color:var(--red);
-font-size:14px;
-min-height:20px;
-margin-bottom:8px
+  color:var(--red);
+  font-size:13px;
+  min-height:20px;
+  margin:8px 0;
 }
 
-.hint{
-font-size:12px;
-color:var(--muted);
-margin-top:5px
+.success{
+  color:#25a960;
+  font-size:13px;
+  min-height:20px;
 }
 
-/* APP */
+/* ================= APP ================= */
 
 .app{
-max-width:1180px;
-margin:auto;
-padding:24px
+  max-width:1200px;
+  margin:auto;
+  padding:20px;
 }
 
 header{
-display:flex;
-align-items:center;
-justify-content:space-between;
-padding:16px 20px;
-margin-bottom:20px;
-background:var(--card);
-backdrop-filter:blur(18px);
-border:1px solid rgba(255,255,255,.8);
-border-radius:24px;
-box-shadow:var(--shadow)
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+  padding:15px 18px;
+  margin-bottom:18px;
+  background:var(--card);
+  backdrop-filter:blur(18px);
+  border:1px solid rgba(255,255,255,.8);
+  border-radius:22px;
+  box-shadow:var(--shadow);
 }
 
 .logo{
-display:flex;
-align-items:center;
-gap:12px;
-font-weight:800;
-font-size:23px
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:22px;
+  font-weight:900;
 }
 
-.logoMark{
-width:43px;
-height:43px;
-border-radius:15px;
-display:grid;
-place-items:center;
-background:linear-gradient(135deg,var(--primary),var(--primary2));
-color:white
+.logo-mark{
+  width:43px;
+  height:43px;
+  display:grid;
+  place-items:center;
+  border-radius:14px;
+  color:white;
+  background:
+    linear-gradient(
+      135deg,
+      var(--primary),
+      var(--primary2)
+    );
+}
+
+.header-right{
+  display:flex;
+  align-items:center;
+  gap:8px;
 }
 
 .tiktok{
-color:white;
-text-decoration:none;
-background:#191827;
-padding:11px 16px;
-border-radius:14px;
-font-weight:700
+  color:white;
+  background:#191827;
+  text-decoration:none;
+  padding:10px 14px;
+  border-radius:13px;
+  font-weight:800;
+  font-size:13px;
+}
+
+.logout{
+  border:0;
+  background:#eeeaf8;
+  color:var(--text);
+  padding:10px 13px;
+  border-radius:13px;
+  font-weight:800;
+  cursor:pointer;
 }
 
 .layout{
-display:grid;
-grid-template-columns:330px 1fr;
-gap:20px
+  display:grid;
+  grid-template-columns:320px 1fr;
+  gap:18px;
 }
 
-.panel,.chat{
-background:var(--card);
-backdrop-filter:blur(18px);
-border:1px solid rgba(255,255,255,.8);
-box-shadow:var(--shadow);
-border-radius:26px
+.panel,
+.chat{
+  background:var(--card);
+  backdrop-filter:blur(18px);
+  border:1px solid rgba(255,255,255,.8);
+  border-radius:24px;
+  box-shadow:var(--shadow);
 }
 
 .panel{
-padding:20px
+  padding:18px;
 }
 
 .search{
-width:100%;
-padding:14px 16px;
-border:0;
-outline:0;
-background:#f1effa;
-border-radius:15px
+  width:100%;
+  border:0;
+  outline:0;
+  padding:14px;
+  background:#f1effa;
+  border-radius:14px;
+  font-size:14px;
 }
 
-.sectionTitle{
-margin:20px 0 10px;
-font-weight:800
+.panel-title{
+  font-weight:900;
+  margin:20px 0 10px;
 }
 
 .user{
-display:flex;
-align-items:center;
-gap:12px;
-padding:13px;
-border-radius:17px;
-cursor:pointer
+  display:flex;
+  align-items:center;
+  gap:11px;
+  padding:11px;
+  border-radius:15px;
+  cursor:pointer;
 }
 
 .user:hover{
-background:var(--soft)
+  background:var(--soft);
 }
 
 .avatar{
-width:45px;
-height:45px;
-min-width:45px;
-border-radius:15px;
-display:grid;
-place-items:center;
-color:white;
-font-weight:800;
-background:linear-gradient(135deg,#8b7cf6,#c59cff)
+  width:44px;
+  height:44px;
+  min-width:44px;
+  border-radius:14px;
+  display:grid;
+  place-items:center;
+  color:white;
+  font-weight:900;
+  background:
+    linear-gradient(
+      135deg,
+      #8b7cf6,
+      #c59cff
+    );
 }
 
-.userInfo{
-min-width:0
+.user-name{
+  font-weight:900;
 }
 
-.userInfo b{
-display:block;
-white-space:nowrap;
-overflow:hidden;
-text-overflow:ellipsis
+.user-status{
+  font-size:12px;
+  color:var(--muted);
 }
 
-.userInfo small{
-color:var(--muted)
+.online-dot{
+  display:inline-block;
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:var(--green);
+  margin-right:5px;
 }
-
-.onlineDot{
-width:9px;
-height:9px;
-border-radius:50%;
-background:var(--green);
-display:inline-block;
-margin-left:5px
-}
-
-/* CHAT */
 
 .chat{
-min-height:650px;
-display:flex;
-flex-direction:column;
-overflow:hidden
+  min-height:650px;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
 }
 
-.chatHead{
-padding:18px 22px;
-border-bottom:1px solid #eeeaf8;
-display:flex;
-align-items:center;
-gap:13px
+.chat-head{
+  padding:18px 22px;
+  border-bottom:1px solid #eeeaf8;
+  display:flex;
+  align-items:center;
+  gap:12px;
 }
 
-.chatTitle{
-font-weight:800
+.chat-title{
+  font-weight:900;
 }
 
-.chatStatus{
-color:var(--muted);
-font-size:12px
-}
-
-.notice{
-margin:12px 18px 0;
-padding:10px 13px;
-border-radius:13px;
-background:#fff7dc;
-color:#75621f;
-font-size:12px;
-text-align:center
+.chat-sub{
+  color:var(--muted);
+  font-size:12px;
+  margin-top:2px;
 }
 
 .messages{
-flex:1;
-padding:22px;
-display:flex;
-flex-direction:column;
-gap:12px;
-overflow-y:auto
+  flex:1;
+  padding:22px;
+  overflow-y:auto;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.welcome{
+  text-align:center;
+  margin:auto;
+  max-width:400px;
+  color:var(--muted);
+}
+
+.welcome-icon{
+  font-size:50px;
 }
 
 .msg{
-max-width:70%;
-padding:12px 15px;
-border-radius:18px;
-line-height:1.4;
-word-break:break-word
+  max-width:70%;
+  padding:11px 14px;
+  border-radius:17px;
+  line-height:1.4;
+  word-break:break-word;
 }
 
-.me{
-align-self:flex-end;
-background:linear-gradient(135deg,var(--primary),#9b82f7);
-color:white;
-border-bottom-right-radius:5px
+.msg.them{
+  align-self:flex-start;
+  background:#eeeaf9;
+  border-bottom-left-radius:5px;
 }
 
-.them{
-align-self:flex-start;
-background:#eeeaf9;
-border-bottom-left-radius:5px
+.msg.me{
+  align-self:flex-end;
+  background:
+    linear-gradient(
+      135deg,
+      var(--primary),
+      #9b82f7
+    );
+  color:white;
+  border-bottom-right-radius:5px;
 }
 
-.msgName{
-font-size:11px;
-font-weight:800;
-opacity:.7;
-margin-bottom:4px
+.msg-name{
+  font-size:11px;
+  font-weight:900;
+  opacity:.7;
+  margin-bottom:3px;
 }
 
-.time{
-font-size:10px;
-opacity:.6;
-margin-top:4px
+.msg-time{
+  font-size:10px;
+  opacity:.6;
+  margin-top:4px;
 }
 
 .system{
-align-self:center;
-font-size:12px;
-color:var(--muted);
-text-align:center
+  align-self:center;
+  color:var(--muted);
+  font-size:12px;
+  text-align:center;
 }
 
-.empty{
-margin:auto;
-text-align:center;
-color:var(--muted)
+.notice{
+  margin:0 17px 8px;
+  padding:10px;
+  background:#fff8e7;
+  border-radius:12px;
+  text-align:center;
+  font-size:12px;
+  color:#806a38;
 }
-
-.emptyIcon{
-font-size:52px
-}
-
-/* COMPOSER */
 
 .composer{
-display:flex;
-gap:10px;
-padding:16px;
-border-top:1px solid #eeeaf8
+  display:flex;
+  gap:8px;
+  padding:15px;
+  border-top:1px solid #eeeaf8;
 }
 
 .composer input{
-flex:1;
-border:0;
-outline:0;
-background:#f1effa;
-border-radius:16px;
-padding:14px
+  flex:1;
+  min-width:0;
+  border:0;
+  outline:0;
+  background:#f1effa;
+  border-radius:14px;
+  padding:14px;
 }
 
 .send{
-border:0;
-color:white;
-background:var(--primary);
-padding:0 20px;
-border-radius:16px;
-font-weight:800;
-cursor:pointer
+  border:0;
+  padding:0 18px;
+  border-radius:14px;
+  background:var(--primary);
+  color:white;
+  font-weight:900;
+  cursor:pointer;
 }
 
-.send:disabled{
-opacity:.5
+.empty-users{
+  color:var(--muted);
+  font-size:13px;
+  padding:10px;
 }
-
-.backButton{
-display:none;
-border:0;
-background:var(--soft);
-border-radius:12px;
-padding:8px 11px;
-cursor:pointer
-}
-
-/* MOBILE */
 
 @media(max-width:800px){
 
-.app{
-padding:12px
-}
+  .layout{
+    grid-template-columns:1fr;
+  }
 
-header{
-margin-bottom:12px
-}
+  .panel{
+    display:none;
+  }
 
-.layout{
-grid-template-columns:1fr
-}
+  .chat{
+    min-height:75vh;
+  }
 
-.panel{
-display:none
-}
+  .app{
+    padding:10px;
+  }
 
-.chat{
-min-height:calc(100vh - 90px)
-}
+  .msg{
+    max-width:84%;
+  }
 
-.msg{
-max-width:84%
-}
+  header{
+    padding:12px;
+  }
 
-.tiktok{
-font-size:12px;
-padding:9px 11px
-}
+  .tiktok{
+    display:none;
+  }
 
-.backButton{
-display:block
-}
-
-.chatHead{
-padding:14px
-}
-
+  .logout{
+    font-size:12px;
+  }
 }
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
+<!-- ================= LOGIN ================= -->
 
 <section class="login" id="loginScreen">
 
-<div class="loginCard">
+  <div class="login-card">
 
-<div class="loginLogo">S</div>
+    <div class="logo-big">S</div>
 
-<h1>SamirChat</h1>
+    <h1>SamirChat</h1>
 
-<p>
-Username və şəxsi kodunla SamirChat-a daxil ol.
-</p>
+    <p>
+      Dostlarınla real vaxtda söhbət et.
+    </p>
 
-<input
-id="usernameInput"
-class="input"
-maxlength="20"
-autocomplete="username"
-placeholder="Username"
->
+    <div class="tabs">
 
-<input
-id="codeInput"
-class="input"
-maxlength="10"
-autocomplete="current-password"
-placeholder="4–10 simvolluq kod"
->
+      <button
+        class="tab active"
+        id="registerTab"
+        type="button"
+      >
+        Hesab yarat
+      </button>
 
-<div class="hint">
-Kod yalnız hərf və rəqəmlərdən ibarət ola bilər.
-</div>
+      <button
+        class="tab"
+        id="loginTab"
+        type="button"
+      >
+        Hesaba daxil ol
+      </button>
 
-<div id="loginError" class="error"></div>
+    </div>
 
-<button id="loginButton" class="loginButton">
-Daxil ol
-</button>
+    <div class="field">
 
-</div>
+      <label>Username</label>
+
+      <input
+        id="authUsername"
+        maxlength="20"
+        autocomplete="username"
+        placeholder="Məsələn: samir_10"
+      >
+
+    </div>
+
+    <div class="field">
+
+      <label>Kod</label>
+
+      <input
+        id="authCode"
+        type="password"
+        maxlength="10"
+        autocomplete="current-password"
+        placeholder="4-10 simvol"
+      >
+
+    </div>
+
+    <div class="code-info">
+      Kod 4-10 simvol olmalıdır. Hərf və rəqəmlərdən istifadə edə bilərsən.
+    </div>
+
+    <div
+      class="error"
+      id="authError"
+    ></div>
+
+    <button
+      class="main-btn"
+      id="authButton"
+      type="button"
+    >
+      Hesab yarat
+    </button>
+
+  </div>
 
 </section>
 
 
-<!-- APP -->
+<!-- ================= APP ================= -->
 
-<div class="app" id="chatApp" style="display:none">
+<div
+  class="app"
+  id="app"
+  style="display:none"
+>
 
 <header>
 
-<div class="logo">
-<div class="logoMark">S</div>
-SamirChat
-</div>
+  <div class="logo">
 
-<a
-class="tiktok"
-href="https://www.tiktok.com/@ssamirreds"
-target="_blank"
-rel="noopener"
->
-TikTok · @ssamirreds
-</a>
+    <div class="logo-mark">
+      S
+    </div>
+
+    SamirChat
+
+  </div>
+
+  <div class="header-right">
+
+    <a
+      class="tiktok"
+      href="https://www.tiktok.com/@ssamirreds"
+      target="_blank"
+      rel="noopener"
+    >
+      TikTok · @ssamirreds
+    </a>
+
+    <button
+      class="logout"
+      id="logoutButton"
+    >
+      Çıxış
+    </button>
+
+  </div>
 
 </header>
 
 
 <div class="layout">
 
-<!-- USERS -->
+  <!-- USERS -->
 
-<aside class="panel">
+  <aside class="panel">
 
-<input
-id="searchInput"
-class="search"
-placeholder="🔎 Username axtar..."
-autocomplete="off"
->
+    <input
+      class="search"
+      id="searchInput"
+      placeholder="🔎 Username axtar..."
+    >
 
-<div class="sectionTitle">
-Online istifadəçilər
-</div>
+    <div class="panel-title">
+      Online istifadəçilər
+    </div>
 
-<div id="usersList"></div>
+    <div id="usersList"></div>
 
-</aside>
-
-
-<!-- CHAT -->
-
-<main class="chat">
-
-<div class="chatHead">
-
-<button
-id="backButton"
-class="backButton"
-onclick="showUsers()"
->
-←
-</button>
-
-<div
-class="avatar"
-id="chatAvatar"
->
-S
-</div>
-
-<div>
-
-<div
-class="chatTitle"
-id="chatTitle"
->
-Ümumi söhbət
-</div>
-
-<div
-class="chatStatus"
-id="chatStatus"
->
-online
-</div>
-
-</div>
-
-</div>
+  </aside>
 
 
-<div class="notice">
-⚠️ Söhbətdə bir-birinizə qarşı hörmətli olun. Nalayiq sözlərdən istifadə etməyin.
-</div>
+  <!-- CHAT -->
+
+  <main class="chat">
+
+    <div class="chat-head">
+
+      <div
+        class="avatar"
+        id="chatAvatar"
+      >
+        S
+      </div>
+
+      <div>
+
+        <div
+          class="chat-title"
+          id="chatTitle"
+        >
+          Ümumi söhbət
+        </div>
+
+        <div
+          class="chat-sub"
+          id="chatSub"
+        >
+          qoşulur...
+        </div>
+
+      </div>
+
+    </div>
 
 
-<div
-class="messages"
-id="messages"
->
+    <div
+      class="messages"
+      id="messages"
+    >
 
-<div
-class="empty"
-id="emptyMessage"
->
+      <div
+        class="welcome"
+        id="welcome"
+      >
 
-<div class="emptyIcon">
-💬
-</div>
+        <div class="welcome-icon">
+          💬
+        </div>
 
-<h2>SamirChat-a xoş gəlmisən</h2>
+        <h2>
+          SamirChat-a xoş gəlmisən
+        </h2>
 
-<p>
-Username ilə dostlarını tap və şəxsi söhbətə başla.
-</p>
+        <p>
+          Online istifadəçiyə toxunaraq
+          şəxsi söhbət başlada bilərsən.
+        </p>
 
-</div>
+      </div>
 
-</div>
+    </div>
 
 
-<div class="composer">
+    <div class="notice">
+      Söhbətdə bir-birinizə qarşı olan hörməti pozmayın və nalayiq sözlərdən istifadə etməyin.
+    </div>
 
-<input
-id="messageInput"
-maxlength="500"
-autocomplete="off"
-placeholder="Mesaj yaz..."
->
 
-<button
-id="sendButton"
-class="send"
->
-Göndər
-</button>
+    <div class="composer">
 
-</div>
+      <input
+        id="messageInput"
+        maxlength="500"
+        placeholder="Mesaj yaz..."
+      >
 
-</main>
+      <button
+        class="send"
+        id="sendButton"
+      >
+        Göndər
+      </button>
+
+    </div>
+
+  </main>
 
 </div>
 
@@ -619,593 +744,751 @@ Göndər
 
 <script>
 
+/* =========================
+   ELEMENTS
+========================= */
+
 const loginScreen =
-document.getElementById("loginScreen");
+  document.getElementById(
+    "loginScreen"
+  );
 
-const chatApp =
-document.getElementById("chatApp");
+const app =
+  document.getElementById(
+    "app"
+  );
 
-const usernameInput =
-document.getElementById("usernameInput");
+const registerTab =
+  document.getElementById(
+    "registerTab"
+  );
 
-const codeInput =
-document.getElementById("codeInput");
+const loginTab =
+  document.getElementById(
+    "loginTab"
+  );
 
-const loginButton =
-document.getElementById("loginButton");
+const authUsername =
+  document.getElementById(
+    "authUsername"
+  );
 
-const loginError =
-document.getElementById("loginError");
+const authCode =
+  document.getElementById(
+    "authCode"
+  );
+
+const authButton =
+  document.getElementById(
+    "authButton"
+  );
+
+const authError =
+  document.getElementById(
+    "authError"
+  );
 
 const usersList =
-document.getElementById("usersList");
+  document.getElementById(
+    "usersList"
+  );
 
 const searchInput =
-document.getElementById("searchInput");
+  document.getElementById(
+    "searchInput"
+  );
 
 const messages =
-document.getElementById("messages");
+  document.getElementById(
+    "messages"
+  );
 
 const messageInput =
-document.getElementById("messageInput");
+  document.getElementById(
+    "messageInput"
+  );
 
 const sendButton =
-document.getElementById("sendButton");
+  document.getElementById(
+    "sendButton"
+  );
 
 const chatTitle =
-document.getElementById("chatTitle");
+  document.getElementById(
+    "chatTitle"
+  );
 
-const chatStatus =
-document.getElementById("chatStatus");
+const chatSub =
+  document.getElementById(
+    "chatSub"
+  );
 
 const chatAvatar =
-document.getElementById("chatAvatar");
+  document.getElementById(
+    "chatAvatar"
+  );
 
-let username="";
-let socket=null;
-let currentChat="general";
+const logoutButton =
+  document.getElementById(
+    "logoutButton"
+  );
 
-let onlineUsers=[];
+
+/* =========================
+   STATE
+========================= */
+
+let authMode = "register";
+
+let username = "";
+
+let token = "";
+
+let socket = null;
+
+let currentDM = null;
 
 
-/* LOGIN */
+/* =========================
+   STORAGE
+========================= */
 
-loginButton.onclick=login;
+token =
+  localStorage.getItem(
+    "samirchat_token"
+  ) || "";
 
-usernameInput.addEventListener(
-"keydown",
-e=>{
-if(e.key==="Enter") codeInput.focus();
-}
+username =
+  localStorage.getItem(
+    "samirchat_username"
+  ) || "";
+
+
+/* =========================
+   TABS
+========================= */
+
+registerTab.onclick =
+  function(){
+
+    authMode =
+      "register";
+
+    registerTab.classList.add(
+      "active"
+    );
+
+    loginTab.classList.remove(
+      "active"
+    );
+
+    authButton.textContent =
+      "Hesab yarat";
+
+    authError.textContent =
+      "";
+
+  };
+
+
+loginTab.onclick =
+  function(){
+
+    authMode =
+      "login";
+
+    loginTab.classList.add(
+      "active"
+    );
+
+    registerTab.classList.remove(
+      "active"
+    );
+
+    authButton.textContent =
+      "Hesaba daxil ol";
+
+    authError.textContent =
+      "";
+
+  };
+
+
+/* =========================
+   AUTH
+========================= */
+
+authButton.onclick =
+  authenticate;
+
+
+authCode.addEventListener(
+  "keydown",
+  e => {
+
+    if(e.key === "Enter"){
+      authenticate();
+    }
+
+  }
 );
 
-codeInput.addEventListener(
-"keydown",
-e=>{
-if(e.key==="Enter") login();
-}
+
+authUsername.addEventListener(
+  "keydown",
+  e => {
+
+    if(e.key === "Enter"){
+      authCode.focus();
+    }
+
+  }
 );
 
 
-async function login(){
+async function authenticate(){
 
-const user=
-usernameInput.value.trim();
+  const user =
+    authUsername.value.trim();
 
-const code=
-codeInput.value.trim();
+  const code =
+    authCode.value.trim();
 
-loginError.textContent="";
+  authError.textContent =
+    "";
 
-if(!/^[A-Za-z0-9_]{3,20}$/.test(user)){
+  const usernameOK =
+    /^[A-Za-z0-9_]{3,20}$/
+      .test(user);
 
-loginError.textContent=
-"Username 3–20 simvol olmalıdır.";
+  const codeOK =
+    /^[A-Za-z0-9]{4,10}$/
+      .test(code);
 
-return;
-}
+  if(!usernameOK){
 
-if(!/^[A-Za-z0-9]{4,10}$/.test(code)){
+    authError.textContent =
+      "Username 3-20 simvol olmalıdır.";
 
-loginError.textContent=
-"Kod 4–10 hərf və rəqəmdən ibarət olmalıdır.";
+    return;
+  }
 
-return;
-}
+  if(!codeOK){
 
-loginButton.disabled=true;
-loginButton.textContent="Yoxlanılır...";
+    authError.textContent =
+      "Kod 4-10 simvol olmalıdır.";
 
-try{
+    return;
+  }
 
-const response=
-await fetch(
-"/api/login",
-{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-username:user,
-code:code
-})
-}
-);
+  authButton.disabled =
+    true;
 
-const data=
-await response.json();
-
-if(!data.ok){
-
-loginError.textContent=
-data.error||"Giriş mümkün olmadı.";
-
-return;
-}
-
-username=data.username;
-
-sessionStorage.setItem(
-"samirchat_user",
-username
-);
-
-loginScreen.style.display="none";
-chatApp.style.display="block";
-
-connect();
-
-}catch(error){
-
-loginError.textContent=
-"Serverə qoşulmaq mümkün olmadı.";
-
-}finally{
-
-loginButton.disabled=false;
-loginButton.textContent="Daxil ol";
-
-}
-
-}
+  authButton.textContent =
+    "Yoxlanılır...";
 
 
-/* CONNECT */
+  try{
 
-function connect(){
+    const endpoint =
+      authMode === "register"
+        ? "/api/register"
+        : "/api/login";
 
-const protocol=
-location.protocol==="https:"
-?"wss:"
-:"ws:";
 
-socket=
-new WebSocket(
-protocol+
-"//"+
-location.host+
-"/ws?username="+
-encodeURIComponent(username)
-);
+    const response =
+      await fetch(
+        endpoint,
+        {
+          method:"POST",
 
-socket.onopen=()=>{
+          headers:{
+            "Content-Type":
+              "application/json"
+          },
 
-chatStatus.textContent="online";
+          body:JSON.stringify({
+            username:user,
+            code:code
+          })
+        }
+      );
 
-};
 
-socket.onmessage=e=>{
+    const data =
+      await response.json();
 
-try{
 
-const data=
-JSON.parse(e.data);
+    if(!response.ok || !data.ok){
 
-if(data.type==="welcome"){
+      authError.textContent =
+        data.error ||
+        "Əməliyyat uğursuz oldu.";
 
-onlineUsers=data.users||[];
-renderUsers();
+      return;
+    }
 
-}
 
-if(data.type==="users"){
+    username =
+      data.username;
 
-onlineUsers=data.users||[];
-renderUsers();
+    token =
+      data.token;
 
-}
 
-if(data.type==="message"){
+    localStorage.setItem(
+      "samirchat_username",
+      username
+    );
 
-if(
-currentChat==="general" ||
-data.from===currentChat ||
-data.username===currentChat ||
-data.to===currentChat
-){
+    localStorage.setItem(
+      "samirchat_token",
+      token
+    );
 
-addMessage(
-data.username,
-data.text,
-data.time
-);
 
-}
+    openApp();
 
-}
+  }catch(error){
 
-if(data.type==="history"){
+    console.error(error);
 
-loadHistory(
-data.messages||[]
-);
+    authError.textContent =
+      "Serverə qoşulmaq mümkün olmadı.";
 
-}
+  }finally{
 
-if(data.type==="system"){
+    authButton.disabled =
+      false;
 
-addSystem(data.text);
+    authButton.textContent =
+      authMode === "register"
+        ? "Hesab yarat"
+        : "Hesaba daxil ol";
 
-}
-
-}catch(err){
-
-console.log(err);
-
-}
-
-};
-
-socket.onclose=()=>{
-
-chatStatus.textContent="offline";
-
-};
+  }
 
 }
 
 
-/* USERS */
+/* =========================
+   OPEN APP
+========================= */
 
-function renderUsers(){
+function openApp(){
 
-usersList.innerHTML="";
+  loginScreen.style.display =
+    "none";
 
-onlineUsers.forEach(user=>{
+  app.style.display =
+    "block";
 
-const item=
-document.createElement("div");
-
-item.className="user";
-
-const avatar=
-document.createElement("div");
-
-avatar.className="avatar";
-
-avatar.textContent=
-user.charAt(0).toUpperCase();
-
-const info=
-document.createElement("div");
-
-info.className="userInfo";
-
-const name=
-document.createElement("b");
-
-name.textContent=
-"@"+user;
-
-const status=
-document.createElement("small");
-
-status.innerHTML=
-user===username
-?"Sən · online"
-:"online <span class='onlineDot'></span>";
-
-info.appendChild(name);
-info.appendChild(status);
-
-item.appendChild(avatar);
-item.appendChild(info);
-
-item.onclick=()=>openDM(user);
-
-usersList.appendChild(item);
-
-});
+  connectWebSocket();
 
 }
 
 
-/* DM */
+/* =========================
+   AUTO LOGIN
+========================= */
 
-function openDM(user){
+if(token && username){
 
-if(user===username){
-
-addSystem(
-"Özünə şəxsi mesaj göndərə bilməzsən."
-);
-
-return;
-}
-
-currentChat=user;
-
-chatTitle.textContent="@"+user;
-
-chatAvatar.textContent=
-user.charAt(0).toUpperCase();
-
-chatStatus.textContent="online";
-
-messages.innerHTML="";
-
-addSystem(
-"Şəxsi söhbət başladı."
-);
-
-if(socket &&
-socket.readyState===WebSocket.OPEN){
-
-socket.send(
-JSON.stringify({
-type:"dm_history",
-with:user
-})
-);
-
-}
+  openApp();
 
 }
 
 
-/* GENERAL */
+/* =========================
+   WEBSOCKET
+========================= */
 
-function showGeneral(){
+function connectWebSocket(){
 
-currentChat="general";
+  if(!token){
 
-chatTitle.textContent=
-"Ümumi söhbət";
+    return;
+  }
 
-chatAvatar.textContent="S";
+  const protocol =
+    location.protocol === "https:"
+      ? "wss:"
+      : "ws:";
 
-chatStatus.textContent="online";
+  socket =
+    new WebSocket(
+      protocol +
+      "//" +
+      location.host +
+      "/ws?token=" +
+      encodeURIComponent(token)
+    );
 
-messages.innerHTML="";
 
-addSystem(
-"Ümumi söhbətə qayıtdın."
-);
+  socket.onopen =
+    function(){
+
+      chatSub.textContent =
+        "online";
+
+      addSystem(
+        "Serverə qoşuldun."
+      );
+
+    };
+
+
+  socket.onmessage =
+    function(event){
+
+      try{
+
+        const data =
+          JSON.parse(
+            event.data
+          );
+
+
+        if(data.type === "welcome"){
+
+          updateUsers(
+            data.users || []
+          );
+
+          return;
+        }
+
+
+        if(data.type === "users"){
+
+          updateUsers(
+            data.users || []
+          );
+
+          return;
+        }
+
+
+        if(data.type === "message"){
+
+          if(currentDM){
+            return;
+          }
+
+          addMessage(
+            data.username,
+            data.text,
+            data.time
+          );
+
+          return;
+        }
+
+
+        if(data.type === "dm"){
+
+          handleDMMessage(
+            data
+          );
+
+          return;
+        }
+
+
+        if(data.type === "system"){
+
+          addSystem(
+            data.text
+          );
+
+          return;
+        }
+
+
+        if(data.type === "error"){
+
+          addSystem(
+            data.error
+          );
+
+        }
+
+      }catch(error){
+
+        console.error(error);
+
+      }
+
+    };
+
+
+  socket.onclose =
+    function(){
+
+      chatSub.textContent =
+        "offline";
+
+    };
 
 }
 
 
-/* BACK */
+/* =========================
+   GENERAL MESSAGE
+========================= */
 
-function showUsers(){
+sendButton.onclick =
+  sendMessage;
 
-showGeneral();
-
-}
-
-
-/* SEND */
-
-sendButton.onclick=sendMessage;
 
 messageInput.addEventListener(
-"keydown",
-e=>{
-if(e.key==="Enter") sendMessage();
-}
+  "keydown",
+  e => {
+
+    if(e.key === "Enter"){
+      sendMessage();
+    }
+
+  }
 );
 
 
 function sendMessage(){
 
-const text=
-messageInput.value.trim();
+  const text =
+    messageInput.value.trim();
 
-if(!text)return;
+  if(!text){
+    return;
+  }
 
-if(
-!socket||
-socket.readyState!==WebSocket.OPEN
-){
+  if(
+    !socket ||
+    socket.readyState !==
+      WebSocket.OPEN
+  ){
 
-addSystem(
-"Serverə qoşulu deyilsən."
-);
+    addSystem(
+      "Serverə qoşulu deyilsən."
+    );
 
-return;
-}
-
-if(currentChat==="general"){
-
-socket.send(
-JSON.stringify({
-type:"message",
-text:text
-})
-);
-
-}else{
-
-socket.send(
-JSON.stringify({
-type:"dm",
-to:currentChat,
-text:text
-})
-);
-
-}
-
-messageInput.value="";
-messageInput.focus();
-
-}
+    return;
+  }
 
 
-/* MESSAGE */
+  if(currentDM){
 
-function addMessage(
-sender,
-text,
-time
-){
+    socket.send(
+      JSON.stringify({
+        type:"dm",
+        to:currentDM,
+        text:text
+      })
+    );
 
-const empty=
-document.getElementById("emptyMessage");
+  }else{
 
-if(empty)empty.remove();
+    socket.send(
+      JSON.stringify({
+        type:"message",
+        text:text
+      })
+    );
 
-const box=
-document.createElement("div");
+  }
 
-box.className=
-sender===username
-?"msg me"
-:"msg them";
 
-const name=
-document.createElement("div");
+  messageInput.value =
+    "";
 
-name.className="msgName";
-
-name.textContent=
-sender===username
-?"Sən"
-:"@"+sender;
-
-const content=
-document.createElement("div");
-
-content.textContent=text;
-
-const tm=
-document.createElement("div");
-
-tm.className="time";
-
-tm.textContent=
-time
-?new Date(time).toLocaleTimeString(
-"az-AZ",
-{
-hour:"2-digit",
-minute:"2-digit"
-}
-)
-:"indi";
-
-box.appendChild(name);
-box.appendChild(content);
-box.appendChild(tm);
-
-messages.appendChild(box);
-
-messages.scrollTop=
-messages.scrollHeight;
+  messageInput.focus();
 
 }
 
 
-/* HISTORY */
+/* =========================
+   USERS
+========================= */
 
-function loadHistory(list){
+function updateUsers(users){
 
-messages.innerHTML="";
+  usersList.innerHTML =
+    "";
 
-if(!list.length){
 
-addSystem(
-"Bu şəxslə hələ mesajlaşmanız yoxdur."
-);
+  if(!users.length){
 
-return;
+    usersList.innerHTML =
+      '<div class="empty-users">Hazırda online istifadəçi yoxdur.</div>';
+
+    return;
+  }
+
+
+  users.forEach(
+    user => {
+
+      const item =
+        document.createElement(
+          "div"
+        );
+
+      item.className =
+        "user";
+
+      item.dataset.username =
+        user.toLowerCase();
+
+
+      const avatar =
+        document.createElement(
+          "div"
+        );
+
+      avatar.className =
+        "avatar";
+
+      avatar.textContent =
+        user
+          .charAt(0)
+          .toUpperCase();
+
+
+      const info =
+        document.createElement(
+          "div"
+        );
+
+
+      const name =
+        document.createElement(
+          "div"
+        );
+
+      name.className =
+        "user-name";
+
+      name.textContent =
+        "@" + user;
+
+
+      const status =
+        document.createElement(
+          "div"
+        );
+
+      status.className =
+        "user-status";
+
+      status.innerHTML =
+        '<span class="online-dot"></span>' +
+        (
+          user.toLowerCase() ===
+          username.toLowerCase()
+            ? "Sən"
+            : "online"
+        );
+
+
+      info.appendChild(name);
+      info.appendChild(status);
+
+      item.appendChild(avatar);
+      item.appendChild(info);
+
+      item.onclick =
+        function(){
+
+          if(
+            user.toLowerCase() ===
+            username.toLowerCase()
+          ){
+            return;
+          }
+
+          openDM(user);
+
+        };
+
+
+      usersList.appendChild(item);
+
+    }
+  );
+
 }
 
-list.forEach(msg=>{
 
-addMessage(
-msg.username,
-msg.text,
-msg.time
-);
-
-});
-
-}
-
-
-/* SYSTEM */
-
-function addSystem(text){
-
-const box=
-document.createElement("div");
-
-box.className="system";
-
-box.textContent=text;
-
-messages.appendChild(box);
-
-messages.scrollTop=
-messages.scrollHeight;
-
-}
-
-
-/* SEARCH */
+/* =========================
+   SEARCH
+========================= */
 
 searchInput.addEventListener(
-"input",
-()=>{
+  "input",
+  function(){
 
-const q=
-searchInput.value
-.trim()
-.toLowerCase();
+    const q =
+      searchInput.value
+        .trim()
+        .toLowerCase();
 
-document
-.querySelectorAll("#usersList .user")
-.forEach(item=>{
+    document
+      .querySelectorAll(
+        "#usersList .user"
+      )
+      .forEach(
+        item => {
 
-item.style.display=
-item.textContent
-.toLowerCase()
-.includes(q)
-?"flex"
-:"none";
+          item.style.display =
+            item.dataset.username
+              .includes(q)
+                ? "flex"
+                : "none";
 
-});
+        }
+      );
+
+  }
+);
+
+
+/* =========================
+   OPEN DM
+========================= */
+
+async function openDM(user){
+
+  currentDM =
+    user;
+
+  chatTitle.textContent =
+    "@" + user;
+
+  chatSub.textContent =
+    "Şəxsi söhbət";
+
+  chatAvatar.textContent =
+    user
+      .charAt(0)
+      .toUpperCase();
+
+
+  messages.innerHTML =
+    "";
+
+
+  addSystem(
+    "Söhbətdə bir-birinizə qarşı olan hörməti pozmayın və nalayiq sözlərdən istifadə etməyin."
+  );
+
+
+  await loadDMHistory(
+    user
+  );
 
 }
-);
 
 
-/* AUTO LOGIN */
-
-const savedUser=
-sessionStorage.getItem(
-"samirchat_user"
-);
-
-/*
-Kod tələb olunduğu üçün
-səhifə yenilənsə avtomatik giriş
-etmirik.
-*/
-
-</script>
-
-</body>
-  </html>
+/* =========================
+   DM HISTORY
+=
