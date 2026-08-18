@@ -557,4 +557,38 @@ export class ChatRoom extends DurableObject {
 
 
   /*
-   * HAMIS
+   * HAMISINA GÖNDƏR
+   */
+
+  broadcast(data) {
+
+    const message =
+      JSON.stringify(data);
+
+    for (
+      const ws
+      of this.ctx.getWebSockets()
+    ) {
+
+      try {
+        ws.send(message);
+      } catch {}
+
+    }
+  }
+
+
+  /*
+   * AKTİV İSTİFADƏÇİLƏRİ YENİLƏ
+   */
+
+  broadcastUsers() {
+
+    this.broadcast({
+      type: "users",
+      users:
+        this.getOnlineUsers()
+    });
+
+  }
+          }
