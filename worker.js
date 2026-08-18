@@ -1,65 +1,301 @@
 import { DurableObject } from "cloudflare:workers";
 
 const USERNAME_RE = /^[A-Za-z0-9_]{3,20}$/;
-const MAX_MESSAGE = 500;
+const CODE_RE = /^[A-Za-z0-9]{4,10}$/;
+const MAX_MESSAGE_LENGTH = 500;
+const MAX_HISTORY = 200;
+
+const BAD_WORDS = [
+  "sik",
+  "sikiş",
+  "sikim",
+  "sikdir",
+  "sikdirin",
+  "amcik",
+  "amcıq",
+  "qəhbə",
+  "qehbe",
+  "orospu",
+  "puta",
+  "fuck",
+  "shit"
+];
+
+function json(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: {
+      "Content-Type": "application/json; charset=utf-8"
+    }
+  });
+}
+
+function normalizeUsername(username) {
+  return String(username || "").trim();
+}
+
+function userKey(username) {
+  return `user:${username.toLowerCase()}`;
+}
+
+function dmKey(a, b) {
+  const users = [
+    a.toLowerCase(),
+    b.toLowerCase()
+  ].sort();
+
+  return `dm:${users[0]}:${users[1]}`;
+}
+
+function containsBadWord(text) {
+  const lower = String(text).toLowerCase();
+
+  return BAD_WORDS.some(word => {
+    return lower.includes(word);
+  });
+}
+
+async function hashCode(code) {
+  const data = new TextEncoder().encode(code);
+
+  const hash = await crypto.subtle.digest(
+    "SHA-256",
+    data
+  );
+
+  return Array.from(new Uint8Array(hash))
+    .map(byte => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+function createToken() {
+  return crypto.randomUUID() + "-" + crypto.randomUUID();
+}
 
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    // WebSocket
-    if (url.pathname === "/ws") {
-      if (request.headers.get("Upgrade") !== "websocket") {
-        return new Response("WebSocket required", { status: 426 });
-      }
+    /*
+     * REGISTER
+     */
 
-      const room = env.CHAT_ROOM.getByName("main");
-      return room.fetch(request);
-    }
-
-    // Username registration
     if (
       url.pathname === "/api/register" &&
       request.method === "POST"
     ) {
       try {
         const body = await request.json();
-        const username = String(body.username || "").trim();
+
+        const username =
+          normalizeUsername(body.username);
+
+        const code =
+          String(body.code || "").trim();
 
         if (!USERNAME_RE.test(username)) {
-          return Response.json(
+          return json(
             {
               ok: false,
-              error: "Username 3-20 simvol olmalıdır."
+              error:
+                "Username 3-20 simvol olmalıdır. Yalnız hərf, rəqəm və _ istifadə et."
             },
-            { status: 400 }
+            400
           );
         }
 
-        const room = env.CHAT_ROOM.getByName("main");
+        if (!CODE_RE.test(code)) {
+          return json(
+            {
+              ok: false,
+              error:
+                "Kod 4-10 simvol olmalıdır və hərf/rəqəm istifadə edə bilərsən."
+            },
+            400
+          );
+        }
+
+        const room =
+          env.CHAT_ROOM.getByName("main");
 
         return room.fetch(
           new Request(
-            new URL("/register", request.url),
+            new URL("/internal/register", request.url),
             {
               method: "POST",
               headers: {
-                "Content-Type": "application/json"
+                "Content-Type":
+                  "application/json"
               },
-              body: JSON.stringify({ username })
+              body: JSON.stringify({
+                username,
+                code
+              })
             }
           )
         );
       } catch {
-        return Response.json(
+        return json(
           {
             ok: false,
             error: "Yanlış sorğu."
           },
-          { status: 400 }
+          400
         );
       }
     }
+
+    /*
+     * LOGIN
+     */
+
+    if (
+      url.pathname === "/api/login" &&
+      request.method === "POST"
+    ) {
+      try {
+        const body = await request.json();
+
+        const username =
+          normalizeUsername(body.username);
+
+        const code =
+          String(body.code || "").trim();
+
+        if (!USERNAME_RE.test(username)) {
+          return json(
+            {
+              ok: false,
+              error: "Username düzgün deyil."
+            },
+            400
+          );
+        }
+
+        if (!CODE_RE.test(code)) {
+          return json(
+            {
+              ok: false,
+              error: "Kod 4-10 simvol olmalıdır."
+            },
+            400
+          );
+        }
+
+        const room =
+          env.CHAT_ROOM.getByName("main");
+
+        return room.fetch(
+          new Request(
+            new URL("/internal/login", request.url),
+            {
+              method: "POST",
+              headers: {
+                "Content-Type":
+                  "application/json"
+              },
+              body: JSON.stringify({
+                username,
+                code
+              })
+            }
+          )
+        );
+      } catch {
+        return json(
+          {
+            ok: false,
+            error: "Yanlış sorğu."
+          },
+          400
+        );
+      }
+    }
+
+    /*
+     * DM HISTORY
+     */
+
+    if (
+      url.pathname === "/api/dm" &&
+      request.method === "GET"
+    ) {
+      const auth =
+        request.headers.get("Authorization");
+
+      if (!auth || !auth.startsWith("Bearer ")) {
+        return json(
+          {
+            ok: false,
+            error: "Giriş tələb olunur."
+          },
+          401
+        );
+      }
+
+      const token =
+        auth.slice(7);
+
+      const other =
+        normalizeUsername(
+          url.searchParams.get("with")
+        );
+
+      if (!other) {
+        return json(
+          {
+            ok: false,
+            error: "İstifadəçi göstərilməyib."
+          },
+          400
+        );
+      }
+
+      const room =
+        env.CHAT_ROOM.getByName("main");
+
+      return room.fetch(
+        new Request(
+          new URL("/internal/dm-history", request.url),
+          {
+            method: "POST",
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
+            body: JSON.stringify({
+              token,
+              other
+            })
+          }
+        )
+      );
+    }
+
+    /*
+     * WEBSOCKET
+     */
+
+    if (url.pathname === "/ws") {
+      if (
+        request.headers.get("Upgrade")
+          ?.toLowerCase() !== "websocket"
+      ) {
+        return new Response(
+          "WebSocket required",
+          { status: 426 }
+        );
+      }
+
+      const room =
+        env.CHAT_ROOM.getByName("main");
+
+      return room.fetch(request);
+    }
+
+    /*
+     * FRONTEND
+     */
 
     return env.ASSETS.fetch(request);
   }
@@ -67,136 +303,258 @@ export default {
 
 
 export class ChatRoom extends DurableObject {
-
   constructor(ctx, env) {
     super(ctx, env);
+
     this.ctx = ctx;
     this.env = env;
   }
 
+  /*
+   * INTERNAL API + WEBSOCKET
+   */
 
   async fetch(request) {
     const url = new URL(request.url);
 
     /*
-     * USERNAME REGISTER
+     * REGISTER
      */
+
     if (
-      url.pathname === "/register" &&
+      url.pathname === "/internal/register" &&
       request.method === "POST"
     ) {
-      const body = await request.json();
-      const username = String(body.username || "").trim();
+      try {
+        const body = await request.json();
 
-      if (!USERNAME_RE.test(username)) {
-        return Response.json(
+        const username =
+          normalizeUsername(body.username);
+
+        const code =
+          String(body.code || "").trim();
+
+        const key =
+          userKey(username);
+
+        const existing =
+          await this.ctx.storage.get(key);
+
+        if (existing) {
+          return json(
+            {
+              ok: false,
+              error:
+                "Bu username artıq istifadə olunur."
+            },
+            409
+          );
+        }
+
+        const codeHash =
+          await hashCode(code);
+
+        await this.ctx.storage.put(
+          key,
+          {
+            username,
+            codeHash,
+            createdAt: Date.now()
+          }
+        );
+
+        const token =
+          createToken();
+
+        await this.ctx.storage.put(
+          `session:${token}`,
+          {
+            username,
+            createdAt: Date.now()
+          }
+        );
+
+        return json({
+          ok: true,
+          username,
+          token
+        });
+      } catch {
+        return json(
           {
             ok: false,
-            error: "Username düzgün deyil."
+            error: "Qeydiyyat zamanı xəta baş verdi."
           },
-          { status: 400 }
+          500
         );
       }
-
-      const key =
-        "user:" + username.toLowerCase();
-
-      const oldUser =
-        await this.ctx.storage.get(key);
-
-      // Username artıq varsa, yenidən istifadə et
-      if (oldUser) {
-        return Response.json({
-          ok: true,
-          username: oldUser.username
-        });
-      }
-
-      await this.ctx.storage.put(
-        key,
-        {
-          username,
-          createdAt: Date.now()
-        }
-      );
-
-      return Response.json({
-        ok: true,
-        username
-      });
     }
-
 
     /*
-     * GET DM HISTORY
-     *
-     * /dm-history?user1=samir&user2=ali
+     * LOGIN
      */
+
     if (
-      url.pathname === "/dm-history" &&
-      request.method === "GET"
+      url.pathname === "/internal/login" &&
+      request.method === "POST"
     ) {
-      const user1 =
-        String(
-          url.searchParams.get("user1") || ""
-        ).trim();
+      try {
+        const body = await request.json();
 
-      const user2 =
-        String(
-          url.searchParams.get("user2") || ""
-        ).trim();
+        const username =
+          normalizeUsername(body.username);
 
-      if (!user1 || !user2) {
-        return Response.json(
+        const code =
+          String(body.code || "").trim();
+
+        const user =
+          await this.ctx.storage.get(
+            userKey(username)
+          );
+
+        if (!user) {
+          return json(
+            {
+              ok: false,
+              error:
+                "Bu username mövcud deyil."
+            },
+            404
+          );
+        }
+
+        const codeHash =
+          await hashCode(code);
+
+        if (codeHash !== user.codeHash) {
+          return json(
+            {
+              ok: false,
+              error: "Kod səhvdir."
+            },
+            401
+          );
+        }
+
+        const token =
+          createToken();
+
+        await this.ctx.storage.put(
+          `session:${token}`,
+          {
+            username: user.username,
+            createdAt: Date.now()
+          }
+        );
+
+        return json({
+          ok: true,
+          username: user.username,
+          token
+        });
+      } catch {
+        return json(
           {
             ok: false,
-            error: "Users required."
+            error: "Giriş zamanı xəta baş verdi."
           },
-          { status: 400 }
+          500
         );
       }
-
-      const messages =
-        await this.getDMHistory(
-          user1,
-          user2
-        );
-
-      return Response.json({
-        ok: true,
-        messages
-      });
     }
 
+    /*
+     * DM HISTORY
+     */
+
+    if (
+      url.pathname === "/internal/dm-history" &&
+      request.method === "POST"
+    ) {
+      try {
+        const body =
+          await request.json();
+
+        const session =
+          await this.ctx.storage.get(
+            `session:${body.token}`
+          );
+
+        if (!session) {
+          return json(
+            {
+              ok: false,
+              error: "Sessiya etibarlı deyil."
+            },
+            401
+          );
+        }
+
+        const other =
+          normalizeUsername(body.other);
+
+        const messages =
+          await this.ctx.storage.get(
+            dmKey(
+              session.username,
+              other
+            )
+          ) || [];
+
+        return json({
+          ok: true,
+          messages
+        });
+      } catch {
+        return json(
+          {
+            ok: false,
+            error:
+              "Mesaj tarixçəsi alınmadı."
+          },
+          500
+        );
+      }
+    }
 
     /*
      * WEBSOCKET
      */
+
     if (
-      request.headers.get("Upgrade") !==
-      "websocket"
+      request.headers.get("Upgrade")
+        ?.toLowerCase() !== "websocket"
     ) {
       return new Response(
-        "SamirChat server işləyir."
+        "SamirChat Worker işləyir.",
+        { status: 200 }
+      );
+    }
+
+    const token =
+      url.searchParams.get("token");
+
+    if (!token) {
+      return new Response(
+        "Token required",
+        { status: 401 }
+      );
+    }
+
+    const session =
+      await this.ctx.storage.get(
+        `session:${token}`
+      );
+
+    if (!session) {
+      return new Response(
+        "Invalid session",
+        { status: 401 }
       );
     }
 
     const username =
-      url.searchParams.get("username");
-
-    if (!username) {
-      return new Response(
-        "Username required",
-        { status: 400 }
-      );
-    }
-
-    if (!USERNAME_RE.test(username)) {
-      return new Response(
-        "Invalid username",
-        { status: 400 }
-      );
-    }
+      session.username;
 
     const pair =
       new WebSocketPair();
@@ -213,30 +571,23 @@ export class ChatRoom extends DurableObject {
     );
 
     server.serializeAttachment({
-      username
+      username,
+      token
     });
 
-    /*
-     * Online users
-     */
     server.send(
       JSON.stringify({
         type: "welcome",
         username,
-        users: this.getUsers()
+        users: this.getOnlineUsers()
       })
     );
 
-    /*
-     * User joined
-     */
     this.broadcast(
       {
         type: "system",
         text:
-          "@" +
-          username +
-          " çata qoşuldu."
+          `@${username} çata qoşuldu.`
       },
       server
     );
@@ -249,13 +600,12 @@ export class ChatRoom extends DurableObject {
     });
   }
 
-
   /*
-   * WEBSOCKET MESSAGE
+   * MESSAGE
    */
-  webSocketMessage(ws, message) {
-    try {
 
+  async webSocketMessage(ws, message) {
+    try {
       const data =
         JSON.parse(message);
 
@@ -263,27 +613,37 @@ export class ChatRoom extends DurableObject {
         ws.deserializeAttachment();
 
       const username =
-        attachment &&
-        attachment.username;
+        attachment?.username;
 
       if (!username) {
         return;
       }
 
-
       /*
        * GENERAL CHAT
        */
+
       if (data.type === "message") {
-
         const text =
-          String(data.text || "").trim();
+          String(data.text || "")
+            .trim();
 
-        if (!text) {
+        if (
+          !text ||
+          text.length > MAX_MESSAGE_LENGTH
+        ) {
           return;
         }
 
-        if (text.length > MAX_MESSAGE) {
+        if (containsBadWord(text)) {
+          ws.send(
+            JSON.stringify({
+              type: "error",
+              error:
+                "Zəhmət olmasa nalayiq sözlərdən istifadə etmə."
+            })
+          );
+
           return;
         }
 
@@ -297,267 +657,182 @@ export class ChatRoom extends DurableObject {
         return;
       }
 
-
       /*
        * DIRECT MESSAGE
        */
-      if (data.type === "dm") {
 
-        this.handleDM(
-          ws,
-          username,
-          data.to,
-          data.text
+      if (data.type === "dm") {
+        const to =
+          normalizeUsername(data.to);
+
+        const text =
+          String(data.text || "")
+            .trim();
+
+        if (
+          !to ||
+          !USERNAME_RE.test(to)
+        ) {
+          return;
+        }
+
+        if (
+          !text ||
+          text.length > MAX_MESSAGE_LENGTH
+        ) {
+          return;
+        }
+
+        if (containsBadWord(text)) {
+          ws.send(
+            JSON.stringify({
+              type: "error",
+              error:
+                "Zəhmət olmasa nalayiq sözlərdən istifadə etmə."
+            })
+          );
+
+          return;
+        }
+
+        /*
+         * Target account exists?
+         */
+
+        const target =
+          await this.ctx.storage.get(
+            userKey(to)
+          );
+
+        if (!target) {
+          ws.send(
+            JSON.stringify({
+              type: "error",
+              error:
+                "Belə username tapılmadı."
+            })
+          );
+
+          return;
+        }
+
+        const messageObject = {
+          id: crypto.randomUUID(),
+          from: username,
+          to: target.username,
+          text,
+          time: Date.now()
+        };
+
+        /*
+         * SAVE DM
+         */
+
+        const key =
+          dmKey(
+            username,
+            target.username
+          );
+
+        let history =
+          await this.ctx.storage.get(key);
+
+        if (!Array.isArray(history)) {
+          history = [];
+        }
+
+        history.push(messageObject);
+
+        if (
+          history.length >
+          MAX_HISTORY
+        ) {
+          history =
+            history.slice(
+              -MAX_HISTORY
+            );
+        }
+
+        await this.ctx.storage.put(
+          key,
+          history
         );
 
-        return;
-      }
+        /*
+         * SEND TO TARGET
+         */
 
+        let delivered = false;
 
-      /*
-       * DM HISTORY REQUEST
-       */
-      if (data.type === "dm_history") {
+        for (
+          const socket
+          of this.ctx.getWebSockets()
+        ) {
+          try {
+            const socketUser =
+              socket
+                .deserializeAttachment()
+                ?.username;
 
-        this.sendDMHistory(
-          ws,
-          username,
-          data.with
+            if (
+              socketUser &&
+              socketUser.toLowerCase() ===
+                target.username.toLowerCase()
+            ) {
+              socket.send(
+                JSON.stringify({
+                  type: "dm",
+                  ...messageObject
+                })
+              );
+
+              delivered = true;
+            }
+          } catch {
+            // ignore disconnected socket
+          }
+        }
+
+        /*
+         * SEND BACK TO SENDER
+         */
+
+        ws.send(
+          JSON.stringify({
+            type: "dm",
+            ...messageObject,
+            delivered
+          })
         );
 
         return;
       }
 
     } catch {
-      return;
-    }
-  }
-
-
-  /*
-   * SEND DM
-   */
-  async handleDM(
-    ws,
-    username,
-    rawTo,
-    rawText
-  ) {
-
-    const to =
-      String(rawTo || "").trim();
-
-    const text =
-      String(rawText || "").trim();
-
-    if (!to || !text) {
-      return;
-    }
-
-    if (text.length > MAX_MESSAGE) {
-      return;
-    }
-
-    if (
-      username.toLowerCase() ===
-      to.toLowerCase()
-    ) {
-      return;
-    }
-
-
-    /*
-     * DM object
-     */
-    const dm = {
-      from: username,
-      to: to,
-      text: text,
-      time: Date.now()
-    };
-
-
-    /*
-     * YADDA SAXLA
-     */
-    await this.saveDM(dm);
-
-
-    /*
-     * Qarşı tərəfə göndər
-     */
-    let delivered = false;
-
-    const sockets =
-      this.ctx.getWebSockets();
-
-    for (const socket of sockets) {
-
-      const info =
-        socket.deserializeAttachment();
-
-      const target =
-        info && info.username;
-
-      if (!target) {
-        continue;
-      }
-
-      if (
-        target.toLowerCase() ===
-        to.toLowerCase()
-      ) {
-
-        socket.send(
+      try {
+        ws.send(
           JSON.stringify({
-            type: "dm",
-            from: username,
-            to: target,
-            text,
-            time: dm.time
+            type: "error",
+            error:
+              "Mesaj göndərilərkən xəta baş verdi."
           })
         );
-
-        delivered = true;
+      } catch {
+        // ignore
       }
     }
-
-
-    /*
-     * Göndərənə də göstər
-     */
-    ws.send(
-      JSON.stringify({
-        type: "dm",
-        from: username,
-        to,
-        text,
-        time: dm.time
-      })
-    );
-
-
-    /*
-     * Qarşı tərəf offline-dırsa
-     */
-    if (!delivered) {
-
-      ws.send(
-        JSON.stringify({
-          type: "system",
-          text:
-            "@" +
-            to +
-            " hazırda online deyil. Mesaj yadda saxlanıldı."
-        })
-      );
-
-    }
   }
 
-
   /*
-   * SAVE DM
+   * USER LEFT
    */
-  async saveDM(dm) {
 
-    const users =
-      [
-        dm.from.toLowerCase(),
-        dm.to.toLowerCase()
-      ].sort();
-
-    const conversationKey =
-      "dm:" +
-      users[0] +
-      ":" +
-      users[1];
-
-    const oldMessages =
-      await this.ctx.storage.get(
-        conversationKey
-      ) || [];
-
-    oldMessages.push(dm);
-
-    /*
-     * Son 500 mesajı saxlayırıq.
-     */
-    const messages =
-      oldMessages.slice(-500);
-
-    await this.ctx.storage.put(
-      conversationKey,
-      messages
-    );
-  }
-
-
-  /*
-   * GET DM HISTORY
-   */
-  async getDMHistory(
-    user1,
-    user2
-  ) {
-
-    const users =
-      [
-        user1.toLowerCase(),
-        user2.toLowerCase()
-      ].sort();
-
-    const key =
-      "dm:" +
-      users[0] +
-      ":" +
-      users[1];
-
-    return (
-      await this.ctx.storage.get(key)
-    ) || [];
-  }
-
-
-  /*
-   * SEND DM HISTORY THROUGH WEBSOCKET
-   */
-  async sendDMHistory(
-    ws,
-    username,
-    otherUser
-  ) {
-
-    if (!otherUser) {
-      return;
-    }
-
-    const messages =
-      await this.getDMHistory(
-        username,
-        String(otherUser)
-      );
-
-    ws.send(
-      JSON.stringify({
-        type: "dm_history",
-        with: otherUser,
-        messages
-      })
-    );
-  }
-
-
-  /*
-   * USER DISCONNECTED
-   */
   webSocketClose(ws) {
-
-    const info =
+    const attachment =
       ws.deserializeAttachment();
 
     const username =
-      info && info.username;
+      attachment?.username;
 
     if (!username) {
       return;
@@ -566,84 +841,81 @@ export class ChatRoom extends DurableObject {
     this.broadcast({
       type: "system",
       text:
-        "@" +
-        username +
-        " çatdan ayrıldı."
+        `@${username} çatdan ayrıldı.`
     });
 
     this.broadcastUsers();
   }
 
-
   /*
    * ONLINE USERS
    */
-  getUsers() {
 
-    const sockets =
-      this.ctx.getWebSockets();
-
+  getOnlineUsers() {
     const users = [];
 
-    for (const socket of sockets) {
+    for (
+      const ws
+      of this.ctx.getWebSockets()
+    ) {
+      try {
+        const username =
+          ws
+            .deserializeAttachment()
+            ?.username;
 
-      const info =
-        socket.deserializeAttachment();
-
-      const username =
-        info && info.username;
-
-      if (!username) {
-        continue;
-      }
-
-      if (!users.includes(username)) {
-        users.push(username);
+        if (
+          username &&
+          !users.some(
+            user =>
+              user.toLowerCase() ===
+              username.toLowerCase()
+          )
+        ) {
+          users.push(username);
+        }
+      } catch {
+        // ignore
       }
     }
 
-    return users;
+    return users.sort(
+      (a, b) =>
+        a.toLowerCase()
+          .localeCompare(
+            b.toLowerCase()
+          )
+    );
   }
-
 
   /*
    * BROADCAST
    */
-  broadcast(
-    data,
-    except
-  ) {
 
+  broadcast(data, except = null) {
     const message =
       JSON.stringify(data);
 
-    const sockets =
-      this.ctx.getWebSockets();
-
-    for (const socket of sockets) {
-
-      if (socket === except) {
+    for (
+      const ws
+      of this.ctx.getWebSockets()
+    ) {
+      if (ws === except) {
         continue;
       }
 
       try {
-        socket.send(message);
+        ws.send(message);
       } catch {
-        continue;
+        // ignore disconnected sockets
       }
     }
   }
 
-
-  /*
-   * UPDATE ONLINE USERS
-   */
   broadcastUsers() {
-
     this.broadcast({
       type: "users",
-      users: this.getUsers()
+      users: this.getOnlineUsers()
     });
   }
-
-    }
+          }
