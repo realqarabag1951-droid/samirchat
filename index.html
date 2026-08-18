@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>SamirChat</title>
 
 <style>
@@ -20,23 +19,18 @@
   --shadow:0 18px 55px rgba(76,62,145,.13);
 }
 
-*{
-  box-sizing:border-box;
-}
+*{box-sizing:border-box}
 
 body{
   margin:0;
   font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;
   color:var(--text);
-
   background:
     radial-gradient(circle at 10% 10%,#e9e4ff 0,transparent 32%),
     radial-gradient(circle at 90% 90%,#ffe8f4 0,transparent 30%),
     var(--bg);
-
   min-height:100vh;
 }
-
 
 /* LOGIN */
 
@@ -65,10 +59,7 @@ body{
   display:grid;
   place-items:center;
   margin:0 auto 18px;
-
-  background:
-    linear-gradient(135deg,var(--primary),var(--primary2));
-
+  background:linear-gradient(135deg,var(--primary),var(--primary2));
   color:white;
   font-size:30px;
   font-weight:900;
@@ -83,37 +74,30 @@ body{
   margin-bottom:25px;
 }
 
-.usernameInput{
+.input{
   width:100%;
   padding:16px;
-
   border:0;
   outline:0;
-
   background:#f1effa;
   border-radius:16px;
-
   font-size:16px;
   margin-bottom:12px;
 }
 
-.loginButton{
+.button{
   width:100%;
   border:0;
   padding:16px;
-
   border-radius:16px;
-
   background:var(--primary);
   color:white;
-
   font-size:16px;
   font-weight:800;
-
   cursor:pointer;
 }
 
-.loginButton:disabled{
+.button:disabled{
   opacity:.6;
 }
 
@@ -121,9 +105,22 @@ body{
   color:var(--danger);
   font-size:14px;
   min-height:20px;
-  margin-bottom:8px;
+  margin-bottom:10px;
 }
 
+.loginSwitch{
+  margin-top:16px;
+  color:var(--muted);
+  font-size:14px;
+}
+
+.loginSwitch button{
+  border:0;
+  background:none;
+  color:var(--primary);
+  font-weight:800;
+  cursor:pointer;
+}
 
 /* APP */
 
@@ -137,16 +134,12 @@ header{
   display:flex;
   align-items:center;
   justify-content:space-between;
-
   padding:16px 20px;
   margin-bottom:20px;
-
   background:var(--card);
   backdrop-filter:blur(18px);
-
   border:1px solid rgba(255,255,255,.8);
   border-radius:24px;
-
   box-shadow:var(--shadow);
 }
 
@@ -154,7 +147,6 @@ header{
   display:flex;
   align-items:center;
   gap:12px;
-
   font-weight:800;
   font-size:23px;
 }
@@ -163,31 +155,20 @@ header{
   width:43px;
   height:43px;
   border-radius:15px;
-
   display:grid;
   place-items:center;
-
-  background:
-    linear-gradient(135deg,var(--primary),var(--primary2));
-
+  background:linear-gradient(135deg,var(--primary),var(--primary2));
   color:white;
 }
 
 .tiktok{
   color:#fff;
   text-decoration:none;
-
   background:#191827;
-
   padding:11px 16px;
-
   border-radius:14px;
-
   font-weight:700;
 }
-
-
-/* LAYOUT */
 
 .layout{
   display:grid;
@@ -199,11 +180,8 @@ header{
 .chat{
   background:var(--card);
   backdrop-filter:blur(18px);
-
   border:1px solid rgba(255,255,255,.8);
-
   box-shadow:var(--shadow);
-
   border-radius:26px;
 }
 
@@ -214,14 +192,10 @@ header{
 .search{
   width:100%;
   padding:14px 16px;
-
   border:0;
   outline:0;
-
   background:#f1effa;
-
   border-radius:15px;
-
   font-size:15px;
 }
 
@@ -230,21 +204,15 @@ header{
   font-weight:800;
 }
 
-
-/* USERS */
+/* USER */
 
 .user{
   display:flex;
   align-items:center;
-
   gap:12px;
-
   padding:13px;
-
   border-radius:17px;
-
   cursor:pointer;
-
   transition:.15s;
 }
 
@@ -252,76 +220,44 @@ header{
   background:var(--soft);
 }
 
+.user.active{
+  background:var(--soft);
+}
+
 .avatar{
   width:45px;
   height:45px;
-
   min-width:45px;
-
   border-radius:15px;
-
   display:grid;
   place-items:center;
-
   color:white;
-
   font-weight:800;
-
-  background:
-    linear-gradient(135deg,#8b7cf6,#c59cff);
+  background:linear-gradient(135deg,#8b7cf6,#c59cff);
 }
 
-.userInfo{
-  min-width:0;
-  flex:1;
-}
-
-.userInfo b{
+.user b{
   display:block;
 }
 
-.userInfo small{
+.user small{
   color:var(--muted);
 }
-
-.dmButton{
-  border:0;
-
-  background:var(--primary);
-
-  color:white;
-
-  padding:7px 10px;
-
-  border-radius:10px;
-
-  font-size:12px;
-
-  font-weight:700;
-
-  cursor:pointer;
-}
-
 
 /* CHAT */
 
 .chat{
   min-height:650px;
-
   display:flex;
   flex-direction:column;
-
   overflow:hidden;
 }
 
 .chatHead{
   padding:20px 24px;
-
   border-bottom:1px solid #eeeaf8;
-
   display:flex;
   align-items:center;
-
   gap:13px;
 }
 
@@ -335,181 +271,119 @@ header{
 }
 
 .dot{
-  width:10px;
-  height:10px;
-
+  width:9px;
+  height:9px;
   border-radius:50%;
-
   background:var(--online);
-
   display:inline-block;
-
   margin-left:4px;
 }
 
+.backButton{
+  display:none;
+  border:0;
+  background:#eeeaf9;
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  font-size:20px;
+  cursor:pointer;
+}
 
 /* MESSAGES */
 
 .messages{
   flex:1;
-
   padding:28px;
-
   display:flex;
   flex-direction:column;
-
   gap:13px;
-
   overflow-y:auto;
 }
 
 .msg{
   max-width:65%;
-
   padding:13px 16px;
-
   border-radius:19px;
-
   line-height:1.4;
-
   word-break:break-word;
 }
 
 .them{
   background:#eeeaf9;
-
   align-self:flex-start;
-
   border-bottom-left-radius:6px;
 }
 
 .me{
-  background:
-    linear-gradient(135deg,var(--primary),#9b82f7);
-
+  background:linear-gradient(135deg,var(--primary),#9b82f7);
   color:white;
-
   align-self:flex-end;
-
   border-bottom-right-radius:6px;
 }
 
 .msgName{
   font-size:12px;
   font-weight:800;
-
   margin-bottom:4px;
-
   opacity:.7;
 }
 
 .time{
   font-size:11px;
-
   opacity:.62;
-
   margin-top:4px;
 }
 
 .system{
   align-self:center;
-
   color:var(--muted);
-
   font-size:12px;
-
   text-align:center;
-
-  padding:6px 10px;
 }
 
-.welcome{
+.empty{
   margin:auto;
-
   text-align:center;
-
-  padding:30px;
-
   color:var(--muted);
 }
 
-.welcomeIcon{
+.emptyIcon{
   font-size:55px;
 }
-
 
 /* COMPOSER */
 
 .composer{
   display:flex;
-
   gap:10px;
-
   padding:17px;
-
   border-top:1px solid #eeeaf8;
 }
 
 .composer input{
   flex:1;
-
   border:0;
   outline:0;
-
   background:#f1effa;
-
   border-radius:16px;
-
   padding:14px;
-
   font-size:15px;
 }
 
 .send{
   border:0;
-
   color:white;
-
   background:var(--primary);
-
   padding:0 20px;
-
   border-radius:16px;
-
   font-weight:800;
-
   cursor:pointer;
 }
 
 .send:disabled{
   opacity:.5;
 }
-
-
-/* DM BADGE */
-
-.dmMode{
-  display:inline-flex;
-
-  align-items:center;
-
-  gap:6px;
-
-  background:#eeeaff;
-
-  color:#6456d8;
-
-  padding:5px 9px;
-
-  border-radius:10px;
-
-  font-size:11px;
-
-  font-weight:800;
-
-  margin-top:4px;
-}
-
 
 /* MOBILE */
 
@@ -524,7 +398,8 @@ header{
   }
 
   .chat{
-    min-height:70vh;
+    display:none;
+    min-height:75vh;
   }
 
   .app{
@@ -540,13 +415,22 @@ header{
     font-size:13px;
   }
 
+  .mobile-chat .panel{
+    display:none;
+  }
+
+  .mobile-chat .chat{
+    display:flex;
+  }
+
+  .mobile-chat .backButton{
+    display:block;
+  }
 }
 </style>
 </head>
 
-
 <body>
-
 
 <!-- LOGIN -->
 
@@ -554,79 +438,87 @@ header{
 
   <div class="loginCard">
 
-    <div class="loginLogo">
-      S
-    </div>
+    <div class="loginLogo">S</div>
 
     <h1>SamirChat</h1>
 
-    <p>
-      Username seç və dostlarınla real vaxtda söhbət et.
+    <p id="loginDescription">
+      Username və kod ilə SamirChat-a daxil ol.
     </p>
 
     <input
       id="usernameInput"
-      class="usernameInput"
+      class="input"
       maxlength="20"
-      autocomplete="off"
-      placeholder="Username daxil et..."
+      autocomplete="username"
+      placeholder="Username"
     >
 
-    <div
-      id="loginError"
-      class="error">
-    </div>
+    <input
+      id="codeInput"
+      class="input"
+      maxlength="6"
+      inputmode="numeric"
+      autocomplete="current-password"
+      placeholder="4-6 rəqəmli kod"
+    >
 
-    <button
-      id="loginButton"
-      class="loginButton">
-      Çata daxil ol
+    <div id="loginError" class="error"></div>
+
+    <button id="loginButton" class="button">
+      Daxil ol
     </button>
+
+    <div class="loginSwitch">
+      <span id="switchText">
+        Hesabın yoxdur?
+      </span>
+
+      <button id="switchButton">
+        Hesab yarat
+      </button>
+    </div>
 
   </div>
 
 </section>
 
 
+<!-- APP -->
 
-<!-- MAIN APP -->
-
-<div
-  class="app"
-  id="chatApp"
-  style="display:none"
->
+<div class="app" id="chatApp" style="display:none">
 
 <header>
 
   <div class="logo">
-
-    <div class="logoMark">
-      S
-    </div>
-
+    <div class="logoMark">S</div>
     SamirChat
-
   </div>
 
+  <div style="display:flex;gap:8px;align-items:center">
 
-  <a
-    class="tiktok"
-    href="https://www.tiktok.com/@ssamirreds"
-    target="_blank"
-    rel="noopener"
-  >
-    TikTok · @ssamirreds
-  </a>
+    <span
+      id="myUsername"
+      style="font-weight:700"
+    ></span>
+
+    <a
+      class="tiktok"
+      href="https://www.tiktok.com/@ssamirreds"
+      target="_blank"
+      rel="noopener"
+    >
+      TikTok · @ssamirreds
+    </a>
+
+  </div>
 
 </header>
 
 
-
 <div class="layout">
 
-
-<!-- USERS PANEL -->
+<!-- ONLINE USERS -->
 
 <aside class="panel">
 
@@ -637,24 +529,27 @@ header{
     autocomplete="off"
   >
 
-
   <div class="title">
     Online istifadəçilər
   </div>
-
 
   <div id="usersList"></div>
 
 </aside>
 
 
-
 <!-- CHAT -->
 
 <main class="chat">
 
-
   <div class="chatHead">
+
+    <button
+      class="backButton"
+      id="backButton"
+    >
+      ←
+    </button>
 
     <div
       class="avatar"
@@ -663,29 +558,25 @@ header{
       S
     </div>
 
-
     <div>
 
       <div
         class="chatTitle"
         id="chatTitle"
       >
-        Ümumi söhbət
+        SamirChat
       </div>
-
 
       <div
         class="chatSubtitle"
         id="chatSubtitle"
       >
-        online
-        <span class="dot"></span>
+        Online istifadəçi seç
       </div>
 
     </div>
 
   </div>
-
 
 
   <div
@@ -694,26 +585,23 @@ header{
   >
 
     <div
-      class="welcome"
-      id="welcome"
+      class="empty"
+      id="emptyMessage"
     >
 
-      <div class="welcomeIcon">
+      <div class="emptyIcon">
         💬
       </div>
 
-      <h2>
-        SamirChat-a xoş gəlmisən
-      </h2>
+      <h2>SamirChat-a xoş gəlmisən</h2>
 
       <p>
-        Dostlarınla söhbət et.
+        Soldan online istifadəçi seç və şəxsi söhbətə başla.
       </p>
 
     </div>
 
   </div>
-
 
 
   <div class="composer">
@@ -722,12 +610,14 @@ header{
       id="messageInput"
       maxlength="500"
       autocomplete="off"
-      placeholder="Mesaj yaz..."
+      placeholder="Əvvəlcə istifadəçi seç..."
+      disabled
     >
 
     <button
       class="send"
       id="sendButton"
+      disabled
     >
       Göndər
     </button>
@@ -741,11 +631,21 @@ header{
 </div>
 
 
-
 <script>
 
+/* =========================
+   STATE
+========================= */
 
-/* ELEMENTS */
+let username = "";
+let socket = null;
+let isRegisterMode = false;
+let selectedUser = null;
+
+
+/* =========================
+   ELEMENTS
+========================= */
 
 const loginScreen =
   document.getElementById("loginScreen");
@@ -756,11 +656,23 @@ const chatApp =
 const usernameInput =
   document.getElementById("usernameInput");
 
+const codeInput =
+  document.getElementById("codeInput");
+
 const loginButton =
   document.getElementById("loginButton");
 
 const loginError =
   document.getElementById("loginError");
+
+const loginDescription =
+  document.getElementById("loginDescription");
+
+const switchText =
+  document.getElementById("switchText");
+
+const switchButton =
+  document.getElementById("switchButton");
 
 const messageInput =
   document.getElementById("messageInput");
@@ -786,843 +698,133 @@ const chatTitle =
 const chatSubtitle =
   document.getElementById("chatSubtitle");
 
+const myUsername =
+  document.getElementById("myUsername");
 
-let username = "";
-
-let socket = null;
-
-let currentDM = null;
-
+const backButton =
+  document.getElementById("backButton");
 
 
-/* BAD WORD FILTER */
+/* =========================
+   LOGIN SWITCH
+========================= */
 
-const badWords = [
-
-  "sik",
-  "siktir",
-  "amk",
-  "aq",
-  "orospu",
-  "göt",
-  "got",
-  "piç",
-  "pic",
-  "fuck",
-  "shit"
-
-];
-
-
-function containsBadWord(text){
-
-  const lower =
-    text.toLowerCase();
-
-  return badWords.some(
-    word =>
-      lower.includes(word)
-  );
-
-}
-
-
-
-/* LOGIN */
-
-loginButton.addEventListener(
+switchButton.addEventListener(
   "click",
-  login
-);
+  function(){
 
+    isRegisterMode =
+      !isRegisterMode;
 
-usernameInput.addEventListener(
-  "keydown",
-  e => {
+    loginError.textContent = "";
 
-    if(e.key === "Enter"){
-      login();
+    if(isRegisterMode){
+
+      loginDescription.textContent =
+        "Öz username və 4-6 rəqəmli kodunu yarat.";
+
+      loginButton.textContent =
+        "Hesab yarat";
+
+      switchText.textContent =
+        "Artıq hesabın var?";
+
+      switchButton.textContent =
+        "Daxil ol";
+
+    }else{
+
+      loginDescription.textContent =
+        "Username və kod ilə SamirChat-a daxil ol.";
+
+      loginButton.textContent =
+        "Daxil ol";
+
+      switchText.textContent =
+        "Hesabın yoxdur?";
+
+      switchButton.textContent =
+        "Hesab yarat";
     }
 
   }
 );
 
 
+/* =========================
+   LOGIN
+========================= */
 
-async function login(){
+loginButton.addEventListener(
+  "click",
+  submitLogin
+);
+
+usernameInput.addEventListener(
+  "keydown",
+  function(e){
+
+    if(e.key === "Enter"){
+      submitLogin();
+    }
+
+  }
+);
+
+codeInput.addEventListener(
+  "keydown",
+  function(e){
+
+    if(e.key === "Enter"){
+      submitLogin();
+    }
+
+  }
+);
+
+
+async function submitLogin(){
 
   const value =
     usernameInput.value.trim();
 
+  const code =
+    codeInput.value.trim();
 
   loginError.textContent = "";
 
-
   if(
-    !/^[A-Za-z0-9_]{3,20}$/
-      .test(value)
+    !/^[A-Za-z0-9_]{3,20}$/.test(value)
   ){
 
     loginError.textContent =
-      "Username 3-20 simvol olmalıdır. Yalnız hərf, rəqəm və _ istifadə et.";
+      "Username 3-20 simvol olmalıdır.";
 
     return;
-
   }
 
+  if(
+    !/^\d{4,6}$/.test(code)
+  ){
+
+    loginError.textContent =
+      "Kod 4-6 rəqəmdən ibarət olmalıdır.";
+
+    return;
+  }
 
   loginButton.disabled = true;
 
   loginButton.textContent =
-    "Yoxlanılır...";
-
+    isRegisterMode
+      ? "Hesab yaradılır..."
+      : "Daxil olunur...";
 
   try{
 
-    const response =
-      await fetch(
-        "/api/register",
-        {
-
-          method:"POST",
-
-          headers:{
-            "Content-Type":
-              "application/json"
-          },
-
-          body:JSON.stringify({
-            username:value
-          })
-
-        }
-      );
-
-
-    const data =
-      await response.json();
-
-
-    if(!data.ok){
-
-      loginError.textContent =
-        data.error ||
-        "Bu username istifadə edilə bilmir.";
-
-      return;
-
-    }
-
-
-    username =
-      data.username;
-
-
-    localStorage.setItem(
-      "samirchat_username",
-      username
-    );
-
-
-    chatAvatar.textContent =
-      username
-        .charAt(0)
-        .toUpperCase();
-
-
-    loginScreen.style.display =
-      "none";
-
-
-    chatApp.style.display =
-      "block";
-
-
-    connect();
-
-  }
-
-  catch(error){
-
-    loginError.textContent =
-      "Serverə qoşulmaq mümkün olmadı.";
-
-  }
-
-  finally{
-
-    loginButton.disabled =
-      false;
-
-    loginButton.textContent =
-      "Çata daxil ol";
-
-  }
-
-}
-
-
-
-/* AUTO LOGIN */
-
-const savedUsername =
-  localStorage.getItem(
-    "samirchat_username"
-  );
-
-
-if(savedUsername){
-
-  username =
-    savedUsername;
-
-
-  loginScreen.style.display =
-    "none";
-
-
-  chatApp.style.display =
-    "block";
-
-
-  chatAvatar.textContent =
-    username
-      .charAt(0)
-      .toUpperCase();
-
-
-  connect();
-
-}
-
-
-
-/* WEBSOCKET */
-
-function connect(){
-
-  const protocol =
-    location.protocol === "https:"
-      ? "wss:"
-      : "ws:";
-
-
-  socket =
-    new WebSocket(
-      protocol +
-      "//" +
-      location.host +
-      "/ws?username=" +
-      encodeURIComponent(username)
-    );
-
-
-  socket.addEventListener(
-    "open",
-    () => {
-
-      chatSubtitle.innerHTML =
-        'online <span class="dot"></span>';
-
-    }
-  );
-
-
-  socket.addEventListener(
-    "message",
-    event => {
-
-      try{
-
-        const data =
-          JSON.parse(event.data);
-
-
-        if(
-          data.type === "welcome"
-        ){
-
-          updateUsers(
-            data.users || []
-          );
-
-        }
-
-
-        if(
-          data.type === "users"
-        ){
-
-          updateUsers(
-            data.users || []
-          );
-
-        }
-
-
-        if(
-          data.type === "message"
-        ){
-
-          if(!currentDM){
-
-            addMessage(
-              data.username,
-              data.text,
-              data.time
-            );
-
-          }
-
-        }
-
-
-        if(
-          data.type === "dm"
-        ){
-
-          handleDM(data);
-
-        }
-
-
-        if(
-          data.type === "system"
-        ){
-
-          if(!currentDM){
-
-            addSystem(
-              data.text
-            );
-
-          }
-
-        }
-
-      }
-
-      catch(error){
-
-        console.log(error);
-
-      }
-
-    }
-  );
-
-
-  socket.addEventListener(
-    "close",
-    () => {
-
-      chatSubtitle.textContent =
-        "offline";
-
-    }
-  );
-
-}
-
-
-
-/* USERS */
-
-function updateUsers(users){
-
-  usersList.innerHTML = "";
-
-
-  const filtered =
-    users.filter(
-      user =>
-        user !== username
-    );
-
-
-  if(filtered.length === 0){
-
-    usersList.innerHTML =
-      `<div style="
-        color:var(--muted);
-        padding:12px;
-      ">
-        Hazırda başqa istifadəçi online deyil.
-      </div>`;
-
-    return;
-
-  }
-
-
-  filtered.forEach(
-    user => {
-
-      const item =
-        document.createElement("div");
-
-      item.className =
-        "user";
-
-
-      const avatar =
-        document.createElement("div");
-
-      avatar.className =
-        "avatar";
-
-      avatar.textContent =
-        user
-          .charAt(0)
-          .toUpperCase();
-
-
-      const info =
-        document.createElement("div");
-
-      info.className =
-        "userInfo";
-
-
-      const name =
-        document.createElement("b");
-
-      name.textContent =
-        "@" + user;
-
-
-      const status =
-        document.createElement("small");
-
-      status.textContent =
-        "🟢 online";
-
-
-      info.appendChild(name);
-
-      info.appendChild(status);
-
-
-      const button =
-        document.createElement("button");
-
-      button.className =
-        "dmButton";
-
-      button.textContent =
-        "DM";
-
-
-      button.onclick =
-        () => openDM(user);
-
-
-      item.appendChild(avatar);
-
-      item.appendChild(info);
-
-      item.appendChild(button);
-
-
-      usersList.appendChild(item);
-
-    }
-  );
-
-}
-
-
-
-/* SEARCH */
-
-searchInput.addEventListener(
-  "input",
-  () => {
-
-    const query =
-      searchInput.value
-        .trim()
-        .toLowerCase();
-
-
-    document
-      .querySelectorAll(
-        "#usersList .user"
-      )
-      .forEach(item => {
-
-        item.style.display =
-          item.textContent
-            .toLowerCase()
-            .includes(query)
-              ? "flex"
-              : "none";
-
-      });
-
-  }
-);
-
-
-
-/* OPEN DM */
-
-function openDM(user){
-
-  currentDM =
-    user;
-
-
-  chatAvatar.textContent =
-    user
-      .charAt(0)
-      .toUpperCase();
-
-
-  chatTitle.textContent =
-    "@" + user;
-
-
-  chatSubtitle.innerHTML =
-    "🔒 Şəxsi söhbət";
-
-
-  messages.innerHTML = "";
-
-
-  addSystem(
-    "⚠️ Bu söhbətdə bir-birinizə qarşı hörmətli olun. Nalayıq sözlərdən istifadə etməyin."
-  );
-
-
-  addSystem(
-    "🔒 Bu, @" +
-    user +
-    " ilə şəxsi söhbətdir."
-  );
-
-
-  messageInput.placeholder =
-    "@" +
-    user +
-    " üçün mesaj yaz...";
-
-
-  messageInput.focus();
-
-}
-
-
-
-/* GENERAL CHAT */
-
-function openGeneralChat(){
-
-  currentDM =
-    null;
-
-
-  chatAvatar.textContent =
-    username
-      .charAt(0)
-      .toUpperCase();
-
-
-  chatTitle.textContent =
-    "Ümumi söhbət";
-
-
-  chatSubtitle.innerHTML =
-    'online <span class="dot"></span>';
-
-
-  messages.innerHTML = "";
-
-
-  const welcome =
-    document.createElement("div");
-
-  welcome.className =
-    "welcome";
-
-
-  welcome.innerHTML = `
-    <div class="welcomeIcon">💬</div>
-    <h2>Ümumi söhbət</h2>
-    <p>Dostlarınla burada söhbət et.</p>
-  `;
-
-
-  messages.appendChild(
-    welcome
-  );
-
-
-  messageInput.placeholder =
-    "Mesaj yaz...";
-
-}
-
-
-
-/* SEND */
-
-sendButton.addEventListener(
-  "click",
-  sendMessage
-);
-
-
-messageInput.addEventListener(
-  "keydown",
-  e => {
-
-    if(e.key === "Enter"){
-
-      sendMessage();
-
-    }
-
-  }
-);
-
-
-
-function sendMessage(){
-
-  const text =
-    messageInput.value.trim();
-
-
-  if(!text){
-    return;
-  }
-
-
-  /* BAD WORD */
-
-  if(
-    containsBadWord(text)
-  ){
-
-    addSystem(
-      "⚠️ Zəhmət olmasa nalayıq sözlərdən istifadə etmə."
-    );
-
-    messageInput.value = "";
-
-    return;
-
-  }
-
-
-  if(
-    !socket ||
-    socket.readyState !==
-      WebSocket.OPEN
-  ){
-
-    addSystem(
-      "Serverlə əlaqə yoxdur."
-    );
-
-    return;
-
-  }
-
-
-  /* DM */
-
-  if(currentDM){
-
-    socket.send(
-      JSON.stringify({
-
-        type:"dm",
-
-        to:currentDM,
-
-        text:text
-
-      })
-    );
-
-  }
-
-  /* GENERAL CHAT */
-
-  else{
-
-    socket.send(
-      JSON.stringify({
-
-        type:"message",
-
-        text:text
-
-      })
-    );
-
-  }
-
-
-  messageInput.value = "";
-
-  messageInput.focus();
-
-}
-
-
-
-/* DM RECEIVE */
-
-function handleDM(data){
-
-  const otherUser =
-    data.from === username
-      ? data.to
-      : data.from;
-
-
-  /*
-   * Yalnız həmin DM açıqdırsa
-   * mesajı ekranda göstəririk.
-   */
-
-  if(
-    currentDM &&
-    otherUser.toLowerCase() ===
-      currentDM.toLowerCase()
-  ){
-
-    addMessage(
-      data.from,
-      data.text,
-      data.time
-    );
-
-    return;
-
-  }
-
-
-  /*
-   * Başqa istifadəçidən DM gələndə
-   * xəbərdarlıq göstər.
-   */
-
-  addSystem(
-    "📩 @" +
-    data.from +
-    " sənə şəxsi mesaj göndərdi."
-  );
-
-}
-
-
-
-/* MESSAGE */
-
-function addMessage(
-  sender,
-  text,
-  timestamp
-){
-
-  const box =
-    document.createElement("div");
-
-
-  box.className =
-    sender === username
-      ? "msg me"
-      : "msg them";
-
-
-  const name =
-    document.createElement("div");
-
-  name.className =
-    "msgName";
-
-
-  name.textContent =
-    sender === username
-      ? "Sən"
-      : "@" + sender;
-
-
-  const content =
-    document.createElement("div");
-
-
-  content.textContent =
-    text;
-
-
-  const time =
-    document.createElement("div");
-
-  time.className =
-    "time";
-
-
-  time.textContent =
-    timestamp
-      ? new Date(timestamp)
-          .toLocaleTimeString(
-            "az-AZ",
-            {
-              hour:"2-digit",
-              minute:"2-digit"
-            }
-          )
-      : "indi";
-
-
-  box.appendChild(name);
-
-  box.appendChild(content);
-
-  box.appendChild(time);
-
-
-  messages.appendChild(box);
-
-
-  messages.scrollTop =
-    messages.scrollHeight;
-
-}
-
-
-
-/* SYSTEM */
-
-function addSystem(text){
-
-  const box =
-    document.createElement("div");
-
-
-  box.className =
-    "system";
-
-
-  box.textContent =
-    text;
-
-
-  messages.appendChild(box);
-
-
-  messages.scrollTop =
-    messages.scrollHeight;
-
-}
-
-
-</script>
-
-</body>
-  </html>
+    const endpoint =
+      isRegisterMode
+        ? "/api/register"
+        : "/api/login";
+
+   
