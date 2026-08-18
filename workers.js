@@ -218,5 +218,4 @@ export class ChatRoom extends DurableObject {
       type: "users",
       users: this.getOnlineUsers(),
     });
-  }
-          }
+  
