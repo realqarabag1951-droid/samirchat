@@ -13,13 +13,18 @@
 body{
   margin:0;
   font-family:Arial,sans-serif;
-  background:#f4f1ff;
   color:#29263d;
+  background:
+    radial-gradient(circle at 10% 10%,#e7e1ff 0,transparent 35%),
+    radial-gradient(circle at 90% 90%,#ffe5f2 0,transparent 35%),
+    #f5f2ff;
 }
 
 button,input{
   font-family:inherit;
 }
+
+/* LOGIN */
 
 .login{
   min-height:100vh;
@@ -31,26 +36,28 @@ button,input{
 
 .card{
   width:100%;
-  max-width:400px;
-  background:white;
-  padding:30px;
-  border-radius:24px;
-  box-shadow:0 15px 45px rgba(60,40,120,.15);
+  max-width:410px;
+  background:rgba(255,255,255,.85);
+  backdrop-filter:blur(20px);
+  padding:32px;
+  border-radius:28px;
+  box-shadow:0 20px 60px rgba(70,50,140,.15);
   text-align:center;
+  border:1px solid rgba(255,255,255,.9);
 }
 
 .logo{
-  width:65px;
-  height:65px;
-  margin:0 auto 15px;
-  border-radius:20px;
-  background:#7567e8;
+  width:68px;
+  height:68px;
+  margin:0 auto 16px;
+  border-radius:21px;
+  background:linear-gradient(135deg,#7567e8,#aa8cf7);
   color:white;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:30px;
-  font-weight:bold;
+  font-size:31px;
+  font-weight:900;
 }
 
 h1{
@@ -68,7 +75,7 @@ input{
   margin-bottom:12px;
   border:0;
   outline:0;
-  border-radius:14px;
+  border-radius:15px;
   background:#f0eef8;
   font-size:16px;
 }
@@ -77,12 +84,16 @@ input{
   width:100%;
   padding:15px;
   border:0;
-  border-radius:14px;
+  border-radius:15px;
   background:#7567e8;
   color:white;
   font-size:16px;
   font-weight:bold;
   cursor:pointer;
+}
+
+.mainButton:hover{
+  filter:brightness(.96);
 }
 
 .mode{
@@ -106,25 +117,49 @@ input{
   font-size:14px;
 }
 
+
+/* APP */
+
 #app{
   display:none;
-  max-width:1000px;
+  max-width:1100px;
   margin:auto;
   padding:20px;
 }
 
+
+/* HEADER */
+
 .header{
-  background:white;
+  background:rgba(255,255,255,.82);
+  backdrop-filter:blur(18px);
   padding:15px 20px;
-  border-radius:20px;
+  border-radius:22px;
   display:flex;
   justify-content:space-between;
   align-items:center;
   margin-bottom:15px;
+  border:1px solid rgba(255,255,255,.9);
+  box-shadow:0 12px 40px rgba(70,50,130,.10);
 }
 
-.header h2{
-  margin:0;
+.brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:21px;
+  font-weight:800;
+}
+
+.brandIcon{
+  width:42px;
+  height:42px;
+  border-radius:14px;
+  background:linear-gradient(135deg,#7567e8,#aa8cf7);
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 
 .logout{
@@ -133,15 +168,110 @@ input{
   border-radius:12px;
   background:#eeeafa;
   cursor:pointer;
+  font-weight:bold;
 }
 
+
+/* SOCIAL */
+
+.socialBox{
+  margin-bottom:18px;
+  padding:18px;
+  border-radius:24px;
+  background:rgba(255,255,255,.78);
+  backdrop-filter:blur(18px);
+  border:1px solid rgba(255,255,255,.9);
+  box-shadow:0 12px 35px rgba(70,50,130,.10);
+}
+
+.socialTitle{
+  text-align:center;
+  font-weight:800;
+  font-size:15px;
+  margin-bottom:13px;
+}
+
+.socialLinks{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+
+.socialCard{
+  text-decoration:none;
+  color:#29263d;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:14px;
+  border-radius:18px;
+  background:#f7f5ff;
+  transition:.2s;
+}
+
+.socialCard:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 20px rgba(80,60,150,.12);
+}
+
+.socialIcon{
+  width:44px;
+  height:44px;
+  min-width:44px;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:white;
+  font-size:23px;
+  font-weight:bold;
+}
+
+.tiktokCard .socialIcon{
+  background:#17151f;
+}
+
+.instagramCard .socialIcon{
+  background:linear-gradient(
+    135deg,
+    #7b3fe4,
+    #e1306c,
+    #ff9f43
+  );
+}
+
+.socialInfo strong{
+  display:block;
+  font-size:14px;
+}
+
+.socialInfo span{
+  display:block;
+  color:#858197;
+  font-size:12px;
+  margin-top:3px;
+}
+
+.arrow{
+  margin-left:auto;
+  color:#8a7df0;
+  font-size:20px;
+}
+
+
+/* CHAT */
+
 .chat{
-  height:75vh;
-  background:white;
-  border-radius:22px;
+  height:72vh;
+  min-height:500px;
+  background:rgba(255,255,255,.86);
+  backdrop-filter:blur(18px);
+  border-radius:24px;
   display:flex;
   flex-direction:column;
   overflow:hidden;
+  border:1px solid rgba(255,255,255,.9);
+  box-shadow:0 15px 45px rgba(70,50,130,.12);
 }
 
 .chatHeader{
@@ -153,7 +283,8 @@ input{
 .status{
   color:#888;
   font-size:13px;
-  margin-top:4px;
+  margin-top:5px;
+  font-weight:normal;
 }
 
 .messages{
@@ -166,13 +297,14 @@ input{
   margin-bottom:12px;
   max-width:75%;
   padding:12px 15px;
-  border-radius:16px;
+  border-radius:17px;
   background:#eeeafa;
+  word-break:break-word;
 }
 
 .message.me{
   margin-left:auto;
-  background:#7567e8;
+  background:linear-gradient(135deg,#7567e8,#9b83f4);
   color:white;
 }
 
@@ -180,13 +312,14 @@ input{
   font-size:12px;
   font-weight:bold;
   margin-bottom:4px;
+  opacity:.75;
 }
 
 .system{
   text-align:center;
   color:#999;
   font-size:13px;
-  margin:10px;
+  margin:12px;
 }
 
 .composer{
@@ -204,33 +337,61 @@ input{
   border:0;
   background:#7567e8;
   color:white;
-  padding:0 20px;
-  border-radius:14px;
+  padding:0 21px;
+  border-radius:15px;
   font-weight:bold;
   cursor:pointer;
 }
 
+.send:hover{
+  filter:brightness(.96);
+}
+
+
+/* MOBILE */
+
 @media(max-width:600px){
+
   #app{
     padding:10px;
   }
 
-  .chat{
-    height:80vh;
+  .header{
+    padding:12px;
   }
 
-  .header h2{
+  .brand{
     font-size:18px;
+  }
+
+  .brandIcon{
+    width:38px;
+    height:38px;
+  }
+
+  .socialLinks{
+    grid-template-columns:1fr;
+  }
+
+  .chat{
+    height:75vh;
+    min-height:450px;
   }
 
   .message{
     max-width:85%;
   }
+
+  .send{
+    padding:0 16px;
+  }
+
 }
 </style>
 </head>
 
 <body>
+
 
 <!-- LOGIN -->
 
@@ -238,9 +399,13 @@ input{
 
   <div class="card">
 
-    <div class="logo">S</div>
+    <div class="logo">
+      S
+    </div>
 
-    <h1>SamirChat</h1>
+    <h1>
+      SamirChat
+    </h1>
 
     <div class="description" id="description">
       Hesab yarat və söhbətə qoşul.
@@ -262,18 +427,28 @@ input{
       autocomplete="off"
     >
 
-    <div class="error" id="error"></div>
+    <div
+      class="error"
+      id="error"
+    ></div>
 
-    <button class="mainButton" id="authButton">
+    <button
+      class="mainButton"
+      id="authButton"
+    >
       Hesab yarat
     </button>
 
     <div class="mode">
-      <span id="modeText">Artıq hesabın var?</span>
+
+      <span id="modeText">
+        Artıq hesabın var?
+      </span>
 
       <button id="modeButton">
         Hesaba daxil ol
       </button>
+
     </div>
 
   </div>
@@ -281,39 +456,140 @@ input{
 </div>
 
 
-<!-- CHAT -->
+<!-- APP -->
 
 <div id="app">
 
+
+  <!-- HEADER -->
+
   <div class="header">
 
-    <h2>💬 SamirChat</h2>
+    <div class="brand">
 
-    <button class="logout" id="logout">
+      <div class="brandIcon">
+        S
+      </div>
+
+      SamirChat
+
+    </div>
+
+    <button
+      class="logout"
+      id="logout"
+    >
       Çıxış
     </button>
 
   </div>
 
+
+  <!-- SOCIAL -->
+
+  <div class="socialBox">
+
+    <div class="socialTitle">
+      🌐 Məni sosial şəbəkələrdə izləyin
+    </div>
+
+    <div class="socialLinks">
+
+
+      <a
+        class="socialCard tiktokCard"
+        href="https://www.tiktok.com/@cosmosreds"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+
+        <div class="socialIcon">
+          ♪
+        </div>
+
+        <div class="socialInfo">
+
+          <strong>
+            TikTok
+          </strong>
+
+          <span>
+            @cosmosreds
+          </span>
+
+        </div>
+
+        <div class="arrow">
+          →
+        </div>
+
+      </a>
+
+
+      <a
+        class="socialCard instagramCard"
+        href="https://www.instagram.com/cosmosreds"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+
+        <div class="socialIcon">
+          ◎
+        </div>
+
+        <div class="socialInfo">
+
+          <strong>
+            Instagram
+          </strong>
+
+          <span>
+            @cosmosreds
+          </span>
+
+        </div>
+
+        <div class="arrow">
+          →
+        </div>
+
+      </a>
+
+
+    </div>
+
+  </div>
+
+
+  <!-- CHAT -->
+
   <div class="chat">
 
     <div class="chatHeader">
 
-      Ümumi söhbət
+      💬 Ümumi söhbət
 
-      <div class="status" id="status">
+      <div
+        class="status"
+        id="status"
+      >
         Serverə qoşulur...
       </div>
 
     </div>
 
-    <div class="messages" id="messages">
+
+    <div
+      class="messages"
+      id="messages"
+    >
 
       <div class="system">
         SamirChat-a xoş gəlmisən!
       </div>
 
     </div>
+
 
     <div class="composer">
 
@@ -325,7 +601,10 @@ input{
         autocomplete="off"
       >
 
-      <button class="send" id="send">
+      <button
+        class="send"
+        id="send"
+      >
         Göndər
       </button>
 
@@ -390,13 +669,15 @@ const logoutButton =
   document.getElementById("logout");
 
 
-/* REGISTER / LOGIN MODE */
+/* LOGIN / REGISTER */
 
 modeButton.onclick = function(){
 
-  loginMode = !loginMode;
+  loginMode =
+    !loginMode;
 
-  errorBox.textContent = "";
+  errorBox.textContent =
+    "";
 
   if(loginMode){
 
@@ -433,7 +714,8 @@ modeButton.onclick = function(){
 
 /* AUTH */
 
-authButton.onclick = auth;
+authButton.onclick =
+  auth;
 
 codeInput.addEventListener(
   "keydown",
@@ -449,7 +731,8 @@ codeInput.addEventListener(
 
 async function auth(){
 
-  errorBox.textContent = "";
+  errorBox.textContent =
+    "";
 
   const name =
     usernameInput.value.trim();
@@ -458,7 +741,9 @@ async function auth(){
     codeInput.value.trim();
 
 
-  if(!/^[A-Za-z0-9_]{3,20}$/.test(name)){
+  if(
+    !/^[A-Za-z0-9_]{3,20}$/.test(name)
+  ){
 
     errorBox.textContent =
       "Username 3-20 simvol olmalıdır.";
@@ -467,7 +752,9 @@ async function auth(){
   }
 
 
-  if(!/^[A-Za-z0-9]{4,10}$/.test(code)){
+  if(
+    !/^[A-Za-z0-9]{4,10}$/.test(code)
+  ){
 
     errorBox.textContent =
       "Kod 4-10 simvol olmalıdır.";
@@ -476,7 +763,8 @@ async function auth(){
   }
 
 
-  authButton.disabled = true;
+  authButton.disabled =
+    true;
 
   authButton.textContent =
     "Gözlə...";
@@ -484,7 +772,7 @@ async function auth(){
 
   try{
 
-    const url =
+    const endpoint =
       loginMode
         ? "/api/login"
         : "/api/register";
@@ -492,7 +780,7 @@ async function auth(){
 
     const response =
       await fetch(
-        url,
+        endpoint,
         {
           method:"POST",
 
@@ -513,7 +801,10 @@ async function auth(){
       await response.json();
 
 
-    if(!response.ok || !data.ok){
+    if(
+      !response.ok ||
+      !data.ok
+    ){
 
       errorBox.textContent =
         data.error ||
@@ -543,7 +834,6 @@ async function auth(){
 
     openApp();
 
-
   }catch(error){
 
     console.error(error);
@@ -553,7 +843,8 @@ async function auth(){
 
   }finally{
 
-    authButton.disabled = false;
+    authButton.disabled =
+      false;
 
     authButton.textContent =
       loginMode
@@ -565,7 +856,7 @@ async function auth(){
 }
 
 
-/* OPEN APP */
+/* OPEN */
 
 function openApp(){
 
@@ -600,12 +891,13 @@ function connect(){
     );
 
 
-  socket.onopen = function(){
+  socket.onopen =
+    function(){
 
-    status.textContent =
-      "🟢 Serverə qoşuldun";
+      status.textContent =
+        "🟢 Serverə qoşuldun";
 
-  };
+    };
 
 
   socket.onmessage =
@@ -614,10 +906,14 @@ function connect(){
       try{
 
         const data =
-          JSON.parse(event.data);
+          JSON.parse(
+            event.data
+          );
 
 
-        if(data.type === "message"){
+        if(
+          data.type === "message"
+        ){
 
           addMessage(
             data.username,
@@ -628,17 +924,24 @@ function connect(){
         }
 
 
-        if(data.type === "system"){
+        if(
+          data.type === "system"
+        ){
 
-          addSystem(data.text);
+          addSystem(
+            data.text
+          );
 
         }
 
 
-        if(data.type === "error"){
+        if(
+          data.type === "error"
+        ){
 
           addSystem(
-            "⚠️ " + data.error
+            "⚠️ " +
+            data.error
           );
 
         }
@@ -652,20 +955,22 @@ function connect(){
     };
 
 
-  socket.onclose = function(){
+  socket.onclose =
+    function(){
 
-    status.textContent =
-      "🔴 Server bağlantısı kəsildi";
+      status.textContent =
+        "🔴 Server bağlantısı kəsildi";
 
-  };
+    };
 
 
-  socket.onerror = function(){
+  socket.onerror =
+    function(){
 
-    status.textContent =
-      "🔴 Serverə qoşulmaq mümkün olmadı";
+      status.textContent =
+        "🔴 Serverə qoşulmaq mümkün olmadı";
 
-  };
+    };
 
 }
 
@@ -705,7 +1010,8 @@ function sendMessage(){
   );
 
 
-  messageInput.value = "";
+  messageInput.value =
+    "";
 
   messageInput.focus();
 
@@ -728,7 +1034,7 @@ messageInput.addEventListener(
 );
 
 
-/* ADD MESSAGE */
+/* MESSAGE */
 
 function addMessage(
   name,
@@ -737,15 +1043,23 @@ function addMessage(
 ){
 
   const div =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
 
   div.className =
     "message" +
-    (mine ? " me" : "");
+    (
+      mine
+        ? " me"
+        : ""
+    );
 
 
   const nameDiv =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
 
   nameDiv.className =
     "name";
@@ -755,17 +1069,25 @@ function addMessage(
 
 
   const textDiv =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
 
   textDiv.textContent =
     text;
 
 
-  div.appendChild(nameDiv);
+  div.appendChild(
+    nameDiv
+  );
 
-  div.appendChild(textDiv);
+  div.appendChild(
+    textDiv
+  );
 
-  messages.appendChild(div);
+  messages.appendChild(
+    div
+  );
 
   messages.scrollTop =
     messages.scrollHeight;
@@ -778,7 +1100,9 @@ function addMessage(
 function addSystem(text){
 
   const div =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
 
   div.className =
     "system";
@@ -786,7 +1110,9 @@ function addSystem(text){
   div.textContent =
     text;
 
-  messages.appendChild(div);
+  messages.appendChild(
+    div
+  );
 
   messages.scrollTop =
     messages.scrollHeight;
@@ -815,8 +1141,11 @@ logoutButton.onclick =
       "samirchat_token"
     );
 
-    username = "";
-    token = "";
+    username =
+      "";
+
+    token =
+      "";
 
     app.style.display =
       "none";
@@ -824,9 +1153,14 @@ logoutButton.onclick =
     loginScreen.style.display =
       "flex";
 
-    usernameInput.value = "";
-    codeInput.value = "";
-    errorBox.textContent = "";
+    usernameInput.value =
+      "";
+
+    codeInput.value =
+      "";
+
+    errorBox.textContent =
+      "";
 
   };
 
@@ -844,7 +1178,10 @@ const savedToken =
   );
 
 
-if(savedUsername && savedToken){
+if(
+  savedUsername &&
+  savedToken
+){
 
   username =
     savedUsername;
