@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SamirChat</title>
+<style>
+:root{
+  --bg:#f6f4ff;
+  --card:rgba(255,255,255,.78);
+  --text:#25233a;
+  --muted:#817e99;
+  --primary:#7c6cf2;
+  --primary2:#a78bfa;
+  --soft:#eeeaff;
+  --online:#43d17a;
+  --shadow:0 18px 55px rgba(76,62,145,.13);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;
+  color:var(--text);background:
+  radial-gradient(circle at 10% 10%,#e9e4ff 0,transparent 32%),
+  radial-gradient(circle at 90% 90%,#ffe8f4 0,transparent 30%),var(--bg);
+  min-height:100vh;
+}
+.app{max-width:1180px;margin:auto;padding:24px}
+header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 20px;margin-bottom:20px;background:var(--card);
+  backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.8);
+  border-radius:24px;box-shadow:var(--shadow)
+}
+.logo{display:flex;align-items:center;gap:12px;font-weight:800;font-size:23px}
+.logoMark{width:43px;height:43px;border-radius:15px;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--primary),var(--primary2));color:white}
+.tiktok{color:#fff;text-decoration:none;background:#191827;padding:11px 16px;border-radius:14px;font-weight:700}
+.layout{display:grid;grid-template-columns:330px 1fr;gap:20px}
+.panel,.chat{background:var(--card);backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.8);box-shadow:var(--shadow);border-radius:26px}
+.panel{padding:20px}
+.search{width:100%;padding:14px 16px;border:0;outline:0;background:#f1effa;border-radius:15px;font-size:15px}
+.title{margin:20px 0 12px;font-weight:800}
+.user{display:flex;align-items:center;gap:12px;padding:13px;border-radius:17px;cursor:pointer}
+.user:hover{background:var(--soft)}
+.avatar{width:45px;height:45px;border-radius:15px;display:grid;place-items:center;color:white;font-weight:800;background:linear-gradient(135deg,#8b7cf6,#c59cff)}
+.user b{display:block}.user small{color:var(--muted)}
+.chat{min-height:650px;display:flex;flex-direction:column;overflow:hidden}
+.chatHead{padding:20px 24px;border-bottom:1px solid #eeeaf8;display:flex;align-items:center;gap:13px}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--online);display:inline-block;margin-left:4px}
+.messages{flex:1;padding:28px;display:flex;flex-direction:column;gap:13px}
+.msg{max-width:65%;padding:13px 16px;border-radius:19px;line-height:1.4}
+.them{background:#eeeaf9;align-self:flex-start;border-bottom-left-radius:6px}
+.me{background:linear-gradient(135deg,var(--primary),#9b82f7);color:white;align-self:flex-end;border-bottom-right-radius:6px}
+.time{font-size:11px;opacity:.62;margin-top:4px}
+.composer{display:flex;gap:10px;padding:17px;border-top:1px solid #eeeaf8}
+.composer input{flex:1;border:0;outline:0;background:#f1effa;border-radius:16px;padding:14px}
+.send{border:0;color:white;background:var(--primary);padding:0 20px;border-radius:16px;font-weight:800;cursor:pointer}
+.welcome{margin:auto;text-align:center;padding:30px}
+.welcomeIcon{font-size:55px}
+@media(max-width:800px){.layout{grid-template-columns:1fr}.panel{display:none}.chat{min-height:75vh}.app{padding:12px}.msg{max-width:82%}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="logo"><div class="logoMark">S</div>SamirChat</div>
+  <a class="tiktok" href="https://www.tiktok.com/@ssamirreds" target="_blank">TikTok · @ssamirreds</a>
+</header>
+
+<div class="layout">
+<aside class="panel">
+  <input class="search" placeholder="🔎 Username axtar...">
+  <div class="title">Söhbətlər</div>
+  <div class="user"><div class="avatar">E</div><div><b>@elvin</b><small>Salam, necəsən? · 2 dəq</small></div></div>
+  <div class="user"><div class="avatar">A</div><div><b>@ali</b><small>Sabah görüşürük? · 8 dəq</small></div></div>
+  <div class="user"><div class="avatar">M</div><div><b>@murad</b><small>😂😂 · 21 dəq</small></div></div>
+</aside>
+
+<main class="chat">
+  <div class="chatHead">
+    <div class="avatar">E</div>
+    <div><b>@elvin</b><div style="color:var(--muted);font-size:13px">online <span class="dot"></span></div></div>
+  </div>
+  <div class="messages">
+    <div class="welcome">
+      <div class="welcomeIcon">💬</div>
+      <h2>SamirChat-a xoş gəlmisən</h2>
+      <p style="color:var(--muted)">Username ilə dostlarını tap və rahat söhbət et.</p>
+    </div>
+    <div class="msg them">Salam, Samir! 👋<div class="time">14:01</div></div>
+    <div class="msg me">Salam 😄 SamirChat necə görünür?<div class="time">14:02</div></div>
+  </div>
+  <div class="composer">
+    <input placeholder="Mesaj yaz..." id="message">
+    <button class="send" onclick="send()">Göndər</button>
+  </div>
+</main>
+</div>
+</div>
+<script>
+function send(){
+ const i=document.getElementById('message');
+ if(!i.value.trim()) return;
+ const box=document.querySelector('.messages');
+ const m=document.createElement('div');
+ m.className='msg me';
+ m.innerHTML=i.value.replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))+'<div class="time">indi</div>';
+ box.appendChild(m); i.value=''; box.scrollTop=box.scrollHeight;
+}
+document.getElementById('message').addEventListener('keydown',e=>{if(e.key==='Enter')send()});
+</script>
+</body>
+</html>
